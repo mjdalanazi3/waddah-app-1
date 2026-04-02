@@ -31,13 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainDashboard()),
-        );
-      }
+      // AuthGate's StreamBuilder on authStateChanges() handles navigation automatically.
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ أثناء تسجيل الدخول';
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {

@@ -48,19 +48,30 @@ class _SignupScreenState extends State<SignupScreen> {
           'completedStages': {},
         }, SetOptions(merge: true));
       }
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainDashboard()),
-        );
-      }
+      // AuthGate's StreamBuilder on authStateChanges() handles navigation automatically.
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ أثناء إنشاء الحساب';
       if (e.code == 'weak-password') {
         message = 'كلمة المرور ضعيفة جداً. يجب أن تكون 6 أحرف على الأقل.';
       } else if (e.code == 'email-already-in-use') {
-        message = 'هذا البريد الإلكتروني مسجل مسبقاً.';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'هذا البريد الإلكتروني مسجل مسبقاً.',
+                style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: 'تسجيل الدخول',
+                textColor: Colors.white,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          );
+        }
+        return;
       } else if (e.code == 'invalid-email') {
         message = 'تنسيق البريد الإلكتروني غير صحيح.';
       }

@@ -42,6 +42,10 @@ class _MainDashboardState extends State<MainDashboard> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: userDocStream,
       builder: (context, snapshot) {
+        // Stream may briefly emit PERMISSION_DENIED right after sign-out — handle silently.
+        if (snapshot.hasError) {
+          return const Scaffold(body: SizedBox.shrink());
+        }
         Map<String, dynamic>? userData;
         if (snapshot.hasData && snapshot.data!.data() != null) {
           userData = snapshot.data!.data();

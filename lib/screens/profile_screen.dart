@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login_screen.dart';
 import 'personal_info_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -36,13 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (route) => false,
-      );
-    }
+    // AuthGate's StreamBuilder on authStateChanges() handles navigation back to LoginScreen automatically.
   }
 
   @override
@@ -57,6 +50,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        // Stream may briefly emit PERMISSION_DENIED right after sign-out — handle silently.
+        if (snapshot.hasError) {
+          return const Scaffold(body: SizedBox.shrink());
         }
 
         final userDoc = snapshot.data?.data() ?? {};
