@@ -86,8 +86,3 @@ flutter doctor
 ```
 
 Ensure the **Android toolchain** shows a ✅ green checkmark.
-
-## Next Steps in Roadmap
-1. Develop the **Progress/Medals Screen**.
-2. Flesh out the interactive logic and database hooks for unlocking map nodes.
-3. Integrate Unity AR (`flutter_unity_widget`) for the Camera View.
