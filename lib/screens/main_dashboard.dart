@@ -312,7 +312,7 @@ class MapScreen extends StatelessWidget {
           child: GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const NodeProgressScreen(nodeTitle: 'آداب المترو')),
+              MaterialPageRoute(builder: (context) => const NodeProgressScreen(moduleTitle: 'آداب المترو')),
             ),
             child: _buildMapNode(
               icon: Icons.play_arrow_rounded,
@@ -333,7 +333,7 @@ class MapScreen extends StatelessWidget {
               if (completedStages.containsKey('aedab')) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const NodeProgressScreen(nodeTitle: 'كيف أتنقل')),
+                  MaterialPageRoute(builder: (context) => const NodeProgressScreen(moduleTitle: 'كيف أتنقل')),
                 );
               }
             },
@@ -357,7 +357,7 @@ class MapScreen extends StatelessWidget {
               if (completedStages.containsKey('travel')) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const NodeProgressScreen(nodeTitle: 'ماذا أفعل عند الضياع')),
+                  MaterialPageRoute(builder: (context) => const NodeProgressScreen(moduleTitle: 'ماذا أفعل عند الضياع')),
                 );
               }
             },

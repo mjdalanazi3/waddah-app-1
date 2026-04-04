@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main_dashboard.dart';
+import 'home_screen.dart';
 
 class ProgressScreen extends StatelessWidget {
   const ProgressScreen({super.key});
@@ -75,7 +76,7 @@ class ProgressScreen extends StatelessWidget {
                                     onPressed: () {
                                       Navigator.pushAndRemoveUntil(
                                         context,
-                                        MaterialPageRoute(builder: (context) => const MainDashboard()),
+                                        MaterialPageRoute(builder: (context) => HomeScreen(userName: userName)),
                                         (route) => false,
                                       );
                                     },

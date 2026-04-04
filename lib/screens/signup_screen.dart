@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -79,7 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(
-              username: _nameController.text.trim(),
+              userName: _nameController.text.trim(),
             ),
           ),
         );
@@ -339,7 +340,7 @@ showDialog(
                       style: GoogleFonts.cairo(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: primaryPurple,
+                        color: const Color(0xFF9000FF)
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -503,7 +504,11 @@ showDialog(
                         ),
                         const SizedBox(width: 4),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                );
+                              },
                           child: Text(
                             'تسجيل الدخول',
                             style: GoogleFonts.cairo(

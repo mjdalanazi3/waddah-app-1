@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
-import 'main_dashboard.dart';
+import 'home_screen.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,6 +31,16 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        final userName = user?.displayName ?? user?.email ?? 'مستخدم';
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(userName: userName)),
+        );
+      }
       // AuthGate's StreamBuilder on authStateChanges() handles navigation automatically.
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ أثناء تسجيل الدخول';
@@ -113,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.asset(
-                              'assets/logo.png',
+                              'assets/UI/RoundLogo.png',
                               height: 100,
                               width: 100,
                               fit: BoxFit.cover,
@@ -136,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         
                         // Title
                         Text(
-                          'مرحباً بك في وضّاح!',
+                          'مرحبًا بك في وضاح!',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.cairo(
                             fontSize: 26,
@@ -269,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'جديد في وضّاح؟',
+                              'جديد في وضاح؟',
                               style: GoogleFonts.cairo(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -281,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const SignupScreen()),
+                                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
                                 );
                               },
                               style: TextButton.styleFrom(

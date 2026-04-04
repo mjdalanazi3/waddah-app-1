@@ -5,13 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main_dashboard.dart'; // To allow returning to map
 import 'lesson_videos_screen.dart';
 import 'quiz_screen.dart';
+import 'ar_screen.dart';
 
 class NodeProgressScreen extends StatefulWidget {
-  final String nodeTitle;
+  final String moduleTitle;
   
   const NodeProgressScreen({
     super.key,
-    required this.nodeTitle,
+    required this.moduleTitle,
   });
 
   @override
@@ -19,24 +20,49 @@ class NodeProgressScreen extends StatefulWidget {
 }
 
 class _NodeProgressScreenState extends State<NodeProgressScreen> {
-  String _stageKeyFromTitle(String title) {
-    switch (title) {
-      case 'آداب المترو':
-        return 'aedab';
-      case 'كيف أتنقل':
-        return 'travel';
-      case 'ماذا أفعل عند الضياع':
-        return 'lost';
-      default:
-        return 'aedab';
-    }
+String _arTaskTitle(String title) {
+  switch (title) {
+    case 'آداب المترو':
+      return 'تصرف بشكل صحيح في المترو';
+    case 'كيف أتنقل':
+      return 'ابحث عن محطتك الصحيحة';
+    case 'ماذا أفعل عند الضياع':
+      return 'ابحث عن موظف المترو';
+    default:
+      return 'ابدأ التجربة';
   }
+}
+
+String _arInstructions(String title) {
+  switch (title) {
+    case 'آداب المترو':
+      return 'وجّه الكاميرا نحو المشهد وحدد التصرف الصحيح داخل المترو';
+    case 'كيف أتنقل':
+      return 'وجّه الكاميرا نحو خريطة المترو وحدد المحطة الصحيحة للوصول إلى وجهتك';
+    case 'ماذا أفعل عند الضياع':
+      return 'وجّه الكاميرا وابحث عن موظف المترو واطلب منه المساعدة';
+    default:
+      return 'وجّه الكاميرا وابدأ التجربة';
+  }
+}
+String _stageKeyFromTitle(String title) {
+  switch (title) {
+    case 'آداب المترو':
+      return 'aedab';
+    case 'كيف أتنقل':
+      return 'travel';
+    case 'ماذا أفعل عند الضياع':
+      return 'lost';
+    default:
+      return 'aedab';
+  }
+}
 
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    final String userName = currentUser?.displayName ?? 'Noura khalid';
-    final stageKey = _stageKeyFromTitle(widget.nodeTitle);
+    final String userName = currentUser?.displayName ?? '';
+    final stageKey = _stageKeyFromTitle(widget.moduleTitle);
 
     if (currentUser == null) {
       return const Scaffold(body: Center(child: Text('يجب تسجيل الدخول')));
@@ -56,6 +82,7 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
         final completedStages = (userData?['completedStages'] as Map<String, dynamic>?) ?? {};
         final stageData = completedStages[stageKey] as Map<String, dynamic>? ?? {};
         final bool lessonCompleted = stageData['lessonCompleted'] == true;
+        final bool quizCompleted = stageData.containsKey('correctAnswers');
 
         return Scaffold(
       body: Container(
@@ -124,7 +151,7 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(40),
                         child: Image.asset(
-                          'assets/logo.png', // Fallback to provided logo
+                          'assets/UI/RoundLogo.png', // Fallback to provided logo
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.train, size: 50, color: Color(0xFF9000FF)),
@@ -248,7 +275,7 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                           const Icon(Icons.menu_book_rounded, color: Color(0xFF9000FF), size: 28),
                           const SizedBox(width: 12),
                           Text(
-                            widget.nodeTitle,
+                            widget.moduleTitle,
                             style: GoogleFonts.cairo(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -269,11 +296,11 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => LessonVideosScreen(nodeTitle: widget.nodeTitle)),
+                                  MaterialPageRoute(builder: (context) => LessonVideosScreen(moduleTitle: widget.moduleTitle)),
                                 );
                               },
                               child: _buildTaskItem(
-                                number: '1',
+                                number: '١',
                                 title: 'الدرس',
                                 subtitle: lessonCompleted ? 'مكتمل ✓' : 'متاح ✓',
                                 icon: Icons.chrome_reader_mode_outlined,
@@ -294,20 +321,20 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                                 if (!lessonCompleted) {
                                   _showLockedDialog(context, isQuiz: true);
                                 } else {
-                                  final stageKey = _stageKeyFromTitle(widget.nodeTitle);
+                                  final stageKey = _stageKeyFromTitle(widget.moduleTitle);
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => QuizScreen(
                                         stageKey: stageKey,
-                                        stageTitle: widget.nodeTitle,
+                                        stageTitle: widget.moduleTitle,
                                       ),
                                     ),
                                   );
                                 }
                               },
                               child: _buildTaskItem(
-                                number: '2',
+                                number: '٢',
                                 title: 'الاختبار',
                                 subtitle: lessonCompleted ? 'ابدأ الآن' : 'مقفل 🔒',
                                 icon: lessonCompleted ? Icons.help_outline_rounded : Icons.lock_outline,
@@ -326,19 +353,36 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
 
                             // 3. AR Game (Locked)
                             GestureDetector(
-                              onTap: () => _showLockedDialog(context, isQuiz: false),
+                              onTap: () {
+                                    if (!quizCompleted) {
+                                      _showLockedDialog(context, isQuiz: false);
+                                    } else {
+                                     Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ARScreen(
+                                            moduleTitle: widget.moduleTitle,
+                                            taskTitle: _arTaskTitle(widget.moduleTitle),
+                                            instructions: _arInstructions(widget.moduleTitle),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                               child: _buildTaskItem(
-                                number: '3',
+                                number: '٣',
                                 title: 'لعبة الواقع\nالافتراضي',
-                                subtitle: 'مقفل 🔒',
-                                icon: Icons.smartphone_rounded,
-                                iconBgColor: const Color(0xFFF1F5F9),
-                                iconColor: const Color(0xFF94A3B8),
-                                pillColor: const Color(0xFFB794F6),
-                                cardBgColor: const Color(0xFFF8FAF9),
-                                borderColor: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
-                                isLocked: true,
-                                subtitleColor: const Color(0xFF94A3B8),
+                                subtitle: quizCompleted ? 'ابدأ الآن 🎮' : 'مقفل 🔒',
+                                icon: quizCompleted ? Icons.smartphone_rounded : Icons.lock_outline,
+                                iconBgColor: quizCompleted ? const Color(0xFFEDE9FE) : const Color(0xFFF1F5F9),
+                                iconColor: quizCompleted ? const Color(0xFF9000FF) : const Color(0xFF94A3B8),
+                                pillColor: quizCompleted ? const Color(0xFF9000FF) : const Color(0xFFB794F6),
+                                cardBgColor: quizCompleted ? Colors.white : const Color(0xFFF8FAF9),
+                                borderColor: quizCompleted
+                                    ? const Color(0xFF9000FF).withValues(alpha: 0.25)
+                                    : const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+                                isLocked: !quizCompleted,
+                                subtitleColor: quizCompleted ? const Color(0xFF9000FF) : const Color(0xFF94A3B8),
                               ),
                             ),
                           ],

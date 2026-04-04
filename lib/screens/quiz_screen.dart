@@ -231,7 +231,7 @@ final Map<String, Map<String, dynamic>> _stageData = {
                       CircleAvatar(
                         radius: 36,
                         backgroundColor: Colors.white,
-                        child: Image.asset('assets/logo.png', height: 48, width: 48, fit: BoxFit.contain),
+                        child: Image.asset('assets/UI/RoundLogo.png', height: 48, width: 48, fit: BoxFit.contain),
                       ),
                       const SizedBox(height: 12),
                       Text(

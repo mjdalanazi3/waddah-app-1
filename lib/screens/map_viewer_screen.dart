@@ -123,7 +123,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                         borderRadius: BorderRadius.circular(8),
                         // Using fallback image if the specific avatar doesn't exist
                         child: Image.asset(
-                          'assets/logo.png', // Fallback to provided logo
+                          'assets/UI/RoundLogo.png', 
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.person, size: 50, color: Color(0xFF9000FF)),
