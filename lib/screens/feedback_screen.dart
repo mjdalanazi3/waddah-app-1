@@ -45,7 +45,7 @@ class FeedbackScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              'أحسنت!',
+              'احسنت',
               style: GoogleFonts.cairo(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

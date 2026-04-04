@@ -110,7 +110,7 @@ class ProgressScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'رائع يا $userName!',
+                            'رائع يا $userName',
                             style: GoogleFonts.cairo(
                               color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,
