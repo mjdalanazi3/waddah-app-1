@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         
                         // Title
                         Text(
-                          'مرحبًا بك في وضاح!',
+                          'مرحبًا بك في وضاح',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.cairo(
                             fontSize: 26,
@@ -265,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : Text(
-                                  'هيا بنا! 🚀',
+                                  'هيا بنا🚀',
                                   style: GoogleFonts.cairo(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,

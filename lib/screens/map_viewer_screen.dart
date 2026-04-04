@@ -163,7 +163,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                     ],
                   ),
                   child: Text(
-                    'استخدم أزرار التكبير والتصغير لاستكشاف\nالخريطة',
+                    'استخدم أيقونات التكبير والتصغير لاستكشاف\nالخريطة',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.cairo(
                       color: const Color(0xFF333333),

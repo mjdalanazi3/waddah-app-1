@@ -400,7 +400,7 @@ final Map<String, Map<String, dynamic>> _stageData = {
                                       radius: 14,
                                       backgroundColor: iconBgColor,
                                       child: Text(
-                                        String.fromCharCode(65 + optionIndex),
+                                        ['أ', 'ب', 'ج'][optionIndex],
                                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
@@ -427,8 +427,8 @@ final Map<String, Map<String, dynamic>> _stageData = {
                       minimumSize: const Size.fromHeight(52),
                     ),
                     child: Text(
-                      _currentIndex == _questions.length - 1 ? 'أنهِ الاختبار' : 'السؤال التالي',
-                      style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold),
+                      _currentIndex == _questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي',
+                      style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
