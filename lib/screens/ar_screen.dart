@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ARScreen extends StatefulWidget {
-  final String moduleTag;
+  final String moduleTitle;
   final String taskTitle;
   final String instructions;
-  final int current;
-  final int total;
 
   const ARScreen({
     super.key,
-    required this.moduleTag,
+    required this.moduleTitle,
     required this.taskTitle,
     required this.instructions,
-    required this.current,
-    required this.total,
   });
 
   @override
@@ -24,8 +22,6 @@ class ARScreen extends StatefulWidget {
 
 class _ARScreenState extends State<ARScreen> {
   bool _audioEnabled = false;
-  late int _current;
-  late int _total;
   CameraController? _cameraController;
   bool _cameraActive = false;
   bool _cameraInitializing = false;
@@ -33,13 +29,6 @@ class _ARScreenState extends State<ARScreen> {
   static const Color primaryPurple = Color(0xFF9810FA);
   static const Color primaryGreen = Color(0xFF00C950);
   static const Color lightPurple = Color(0xFFE8D5F5);
-
-  @override
-  void initState() {
-    super.initState();
-    _current = widget.current;
-    _total = widget.total;
-  }
 
   @override
   void dispose() {
@@ -80,7 +69,6 @@ class _ARScreenState extends State<ARScreen> {
         await controller.dispose();
       }
     } catch (e) {
-      // Silently fail — camera works on real device, not emulator
       if (mounted) {
         setState(() {
           _cameraInitializing = false;
@@ -226,7 +214,6 @@ class _ARScreenState extends State<ARScreen> {
       );
     }
 
-    // Default — tap to open camera
     return GestureDetector(
       onTap: _showCameraPermissionDialog,
       child: Container(
@@ -258,7 +245,6 @@ class _ARScreenState extends State<ARScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Main content
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -290,7 +276,6 @@ class _ARScreenState extends State<ARScreen> {
                     ),
                   ),
 
-                  // Title
                   Text(
                     'ألعاب الواقع المعزز',
                     style: GoogleFonts.cairo(
@@ -332,7 +317,7 @@ class _ARScreenState extends State<ARScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Module tag
+                              // Module title pill
                               Center(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
@@ -348,7 +333,7 @@ class _ARScreenState extends State<ARScreen> {
                                           style: TextStyle(fontSize: 14)),
                                       const SizedBox(width: 8),
                                       Text(
-                                        widget.moduleTag,
+                                        widget.moduleTitle,
                                         style: GoogleFonts.cairo(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -361,29 +346,6 @@ class _ARScreenState extends State<ARScreen> {
                               ),
 
                               const SizedBox(height: 10),
-
-                              // Progress counter + bar
-                              Text(
-                                '$_current من $_total',
-                                style: GoogleFonts.cairo(
-                                  fontSize: 14,
-                                  color: const Color(0xFF888888),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 4),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: LinearProgressIndicator(
-                                  value: 0,
-                                  backgroundColor: const Color(0xFFEEEEEE),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      primaryPurple),
-                                  minHeight: 8,
-                                ),
-                              ),
-
-                              const SizedBox(height: 8),
 
                               // Task title
                               Text(
@@ -462,7 +424,7 @@ class _ARScreenState extends State<ARScreen> {
                                   label: Text(
                                     _audioEnabled
                                         ? 'السرد الصوتي مفعّل'
-                                        : 'السرد الصوتي مفعل',
+                                        : 'السرد الصوتي مفعّل',
                                     style: GoogleFonts.cairo(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
@@ -481,59 +443,42 @@ class _ARScreenState extends State<ARScreen> {
 
                               const SizedBox(height: 10),
 
-                              // Bottom buttons
-                              Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () {},
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: primaryPurple,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(14),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 14),
-                                          elevation: 0,
-                                        ),
-                                        child: Text(
-                                          'التالي',
-                                          style: GoogleFonts.cairo(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
+                              // End game button
+                              SizedBox(
+                                width: double.infinity,
+                                height: 46,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final user = FirebaseAuth.instance.currentUser;
+                                    if (user != null) {
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(user.uid)
+                                          .set({
+                                        'completedStages': {
+                                          widget.moduleTitle: {
+                                            'arCompleted': true,
+                                          }
+                                        }
+                                      }, SetOptions(merge: true));
+                                    }
+                                    if (context.mounted) Navigator.pop(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryPurple,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        onPressed: () {},
-                                        style: OutlinedButton.styleFrom(
-                                          side: BorderSide(
-                                              color: primaryPurple, width: 2),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(14),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 14),
-                                        ),
-                                        child: Text(
-                                          'حاول مرة أخرى',
-                                          style: GoogleFonts.cairo(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: primaryPurple,
-                                          ),
-                                        ),
-                                      ),
+                                    elevation: 0,
+                                  ),
+                                  child: Text(
+                                    'إنهاء اللعبة',
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -547,7 +492,7 @@ class _ARScreenState extends State<ARScreen> {
             ),
           ),
 
-          // Return button always on top
+          // Return button
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,

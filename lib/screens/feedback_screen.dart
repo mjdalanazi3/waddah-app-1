@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'main_dashboard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'home_screen.dart'; // Ensure this matches your filename
 import 'quiz_screen.dart';
 
 class FeedbackScreen extends StatelessWidget {
@@ -50,7 +52,6 @@ class FeedbackScreen extends StatelessWidget {
                 color: const Color(0xFF8B5CF6),
               ),
             ),
-            
             const SizedBox(height: 20),
             Expanded(
               child: Padding(
@@ -66,7 +67,7 @@ class FeedbackScreen extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 13),
+                        color: Colors.black.withValues(alpha: 0.13),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -123,23 +124,38 @@ class FeedbackScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const MainDashboard()),
-                                (route) => false,
-                              ),
+                              onPressed: () async {
+                                final user = FirebaseAuth.instance.currentUser;
+                                final doc = await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(user?.uid)
+                                    .get();
+                                
+                                final username = doc.data()?['username'] ?? 
+                                                user?.email?.split('@')[0] ?? 'مستخدم';
+                                
+                                if (context.mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HomeScreen(userName: username),
+                                    ),
+                                    (route) => false,
+                                  );
+                                }
+                              },
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 side: const BorderSide(color: Color(0xFFCBD5E1)),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               child: Text(
-                                'العودة للرئيسية',
+                                'الرئيسية',
                                 style: GoogleFonts.cairo(fontSize: 16, color: const Color(0xFF1F2937)),
                               ),
                             ),
                           ),
-                        ],
+                        ], // Added missing bracket here
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -162,11 +178,11 @@ class FeedbackScreen extends StatelessWidget {
                           child: Text(
                             'إعادة اللعب',
                             style: GoogleFonts.cairo(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white, 
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                            )
+                          ),
                         ),
                       ),
                     ],
