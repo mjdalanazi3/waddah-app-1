@@ -64,7 +64,7 @@ class ProgressScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24.0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Container(
                                   decoration: const BoxDecoration(

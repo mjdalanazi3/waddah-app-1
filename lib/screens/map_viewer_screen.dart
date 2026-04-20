@@ -80,7 +80,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  textDirection: TextDirection.rtl,
                   children: [
                     // Back Button (Conceptual right -> points left but in RTL context it's right pointing arrow)
                     Container(
@@ -102,40 +102,22 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-
-                    // Center Avatar Box
-                    Container(
-                      width: 80,
-                      height: 80,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        // Using fallback image if the specific avatar doesn't exist
-                        child: Image.asset(
-                          'assets/UI/RoundLogo.png', 
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.person, size: 50, color: Color(0xFF9000FF)),
-                        ),
-                      ),
-                    ),
-
-                    // Empty space for flex alignment
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
+              Expanded(
+  flex: 3,
+  child: Center(
+    child: Transform.translate(
+      offset: const Offset(25, 0), //  يحركه يمين
+      child: Image.asset(
+        'assets/UI/RoundLogo.png',
+        height: 120,
+        fit: BoxFit.contain,
+      ),
+    ),
+  ),
+),
+],
+),
+),
 
               // Title
               Text(

@@ -275,7 +275,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
                       width: 48,

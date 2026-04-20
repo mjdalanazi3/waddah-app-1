@@ -160,37 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Progress Bar
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '$progressPercent%',
-                            style: GoogleFonts.cairo(
-                              color: const Color(0xFF00C853),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'التقدم للمستوى التالي',
-                            style: GoogleFonts.cairo(
-                              color: const Color(0xFF64748B),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Progress Track
-                      Container(
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
+                      
                       // Tri-Stats Row
                       Row(
                         children: [
@@ -412,7 +382,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.logout, color: Colors.white70),
+                      
                       Text(
                         'تسجيل الخروج',
                         style: GoogleFonts.cairo(

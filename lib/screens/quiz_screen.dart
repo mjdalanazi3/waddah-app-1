@@ -199,7 +199,7 @@ final Map<String, Map<String, dynamic>> _stageData = {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Container(
                         width: 45,
@@ -228,11 +228,11 @@ final Map<String, Map<String, dynamic>> _stageData = {
                 Center(
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 36,
-                        backgroundColor: Colors.white,
-                        child: Image.asset('assets/UI/RoundLogo.png', height: 48, width: 48, fit: BoxFit.contain),
-                      ),
+                      Image.asset(
+    'assets/UI/RoundLogo.png',
+    height: 120,
+    fit: BoxFit.contain,
+  ),
                       const SizedBox(height: 12),
                       Text(
                         'الاختبار',
