@@ -36,7 +36,7 @@ class LessonVideosScreen extends StatelessWidget {
                   children: [
                     // Top Row: Home Button (Left) -> Avatar Circle (Center) -> Back Button (Right)
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      textDirection: TextDirection.rtl,
                       children: [
                         // Back Button
                         Container(
@@ -59,32 +59,16 @@ class LessonVideosScreen extends StatelessWidget {
                           ),
                         ),
 
-                        // Avatar Circle
-                        Container(
-                          width: 80,
-                          height: 80,
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Image.asset(
-                              'assets/UI/RoundLogo.png', // Fallback
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.train, size: 40, color: Color(0xFF9000FF)),
-                            ),
-                          ),
-                        ),
+                        Expanded(
+  child: Center(
+    child: Image.asset(
+      'assets/UI/RoundLogo.png',
+      height: 120,
+      fit: BoxFit.contain,
+    ),
+  ),
+),
+                        
 
                         // Home Button
                         GestureDetector(

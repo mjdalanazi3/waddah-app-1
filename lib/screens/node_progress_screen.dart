@@ -134,30 +134,17 @@ String _stageKeyFromTitle(String title) {
                   children: [
                     // Floating Logo Box
                     Container(
-                      width: 90,
-                      height: 90,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(40),
-                        child: Image.asset(
-                          'assets/UI/RoundLogo.png', // Fallback to provided logo
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.train, size: 50, color: Color(0xFF9000FF)),
-                        ),
-                      ),
-                    ),
+  width: 120,
+  height: 120,
+  child: Image.asset(
+    'assets/UI/RoundLogo.png',
+    fit: BoxFit.contain,
+    errorBuilder: (context, error, stackTrace) =>
+        const Icon(Icons.train, size: 10, color: Color(0xFF9000FF)),
+  ),
+),
+                      
+                    
                     const SizedBox(height: 24),
 
                     // User Info Pill
