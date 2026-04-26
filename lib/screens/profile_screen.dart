@@ -196,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(width: 8),
                           _buildStatCard(
-                            label: 'المهام',
+                            label: 'المراحل',
                             value: '$tasksCompleted/$taskTotal',
                             iconWidget: const Icon(Icons.track_changes, color: Color(0xFF00C853), size: 32),
                             bgColor: const Color(0xFFE8F5E9), // Light Green
