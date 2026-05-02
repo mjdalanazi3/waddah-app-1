@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:camera/camera.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,12 +8,14 @@ class ARScreen extends StatefulWidget {
   final String moduleTitle;
   final String taskTitle;
   final String instructions;
+  final int gameScene;
 
   const ARScreen({
     super.key,
     required this.moduleTitle,
     required this.taskTitle,
     required this.instructions,
+    required this.gameScene,
   });
 
   @override
@@ -21,223 +23,38 @@ class ARScreen extends StatefulWidget {
 }
 
 class _ARScreenState extends State<ARScreen> {
+  static const _channel = MethodChannel('com.example.waddah_app/unity');
   bool _audioEnabled = false;
-  CameraController? _cameraController;
-  bool _cameraActive = false;
-  bool _cameraInitializing = false;
 
   static const Color primaryPurple = Color(0xFF9810FA);
   static const Color primaryGreen = Color(0xFF00C950);
   static const Color lightPurple = Color(0xFFE8D5F5);
 
-  @override
-  void dispose() {
-    _cameraController?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _initCamera() async {
-    if (!mounted) return;
-    setState(() {
-      _cameraInitializing = true;
-      _cameraActive = false;
-    });
-
+  Future<void> _launchUnity() async {
     try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        if (mounted) setState(() => _cameraInitializing = false);
-        return;
-      }
-
-      final controller = CameraController(
-        cameras.first,
-        ResolutionPreset.low,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-
-      await controller.initialize();
-
-      if (mounted) {
-        setState(() {
-          _cameraController = controller;
-          _cameraActive = true;
-          _cameraInitializing = false;
-        });
-      } else {
-        await controller.dispose();
-      }
+      await _channel.invokeMethod('launchUnity', {
+        'sceneIndex': widget.gameScene,
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _cameraInitializing = false;
-          _cameraActive = false;
-        });
-      }
+      debugPrint('Error launching Unity: $e');
     }
   }
 
-  void _showCameraPermissionDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: const BoxDecoration(
-                    color: primaryPurple,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_rounded,
-                    color: Colors.white,
-                    size: 36,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'السماح بالوصول للكاميرا',
-                  style: GoogleFonts.cairo(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A1A),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'تحتاج تجربة الواقع المعزز إلى استخدام الكاميرا، هل تسمح بذلك؟',
-                  style: GoogleFonts.cairo(
-                    fontSize: 16,
-                    color: const Color(0xFF666666),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _initCamera();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'نعم، السماح',
-                          style: GoogleFonts.cairo(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFFDDDDDD)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: Text(
-                          'لا',
-                          style: GoogleFonts.cairo(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF666666),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCameraView() {
-    if (_cameraInitializing) {
-      return Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF222222),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 12),
-              Text(
-                'جاري تشغيل الكاميرا...',
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      );
+  Future<void> _endGame() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+        'completedStages': {
+          widget.moduleTitle: {
+            'arCompleted': true,
+          }
+        }
+      }, SetOptions(merge: true));
     }
-
-    if (_cameraActive &&
-        _cameraController != null &&
-        _cameraController!.value.isInitialized) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: CameraPreview(_cameraController!),
-      );
-    }
-
-    return GestureDetector(
-      onTap: _showCameraPermissionDialog,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF222222),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Center(
-          child: Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: primaryPurple.withOpacity(0.85),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.camera_alt_rounded,
-              color: Colors.white,
-              size: 40,
-            ),
-          ),
-        ),
-      ),
-    );
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -358,12 +175,7 @@ class _ARScreenState extends State<ARScreen> {
                                 textAlign: TextAlign.center,
                               ),
 
-                              const SizedBox(height: 10),
-
-                              // Camera view
-                              Expanded(child: _buildCameraView()),
-
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 20),
 
                               // Instructions
                               Row(
@@ -405,7 +217,7 @@ class _ARScreenState extends State<ARScreen> {
                                 ],
                               ),
 
-                              const SizedBox(height: 10),
+                              const Spacer(),
 
                               // Audio toggle
                               SizedBox(
@@ -443,29 +255,43 @@ class _ARScreenState extends State<ARScreen> {
 
                               const SizedBox(height: 10),
 
+                              // Launch Unity button
+                              SizedBox(
+                                width: double.infinity,
+                                height: 56,
+                                child: ElevatedButton.icon(
+                                  onPressed: _launchUnity,
+                                  iconAlignment: IconAlignment.end,
+                                  icon: const Icon(Icons.play_arrow_rounded,
+                                      size: 24),
+                                  label: Text(
+                                    'ابدأ اللعبة',
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryPurple,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
+
                               // End game button
                               SizedBox(
                                 width: double.infinity,
                                 height: 46,
                                 child: ElevatedButton(
-                                  onPressed: () async {
-                                    final user = FirebaseAuth.instance.currentUser;
-                                    if (user != null) {
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(user.uid)
-                                          .set({
-                                        'completedStages': {
-                                          widget.moduleTitle: {
-                                            'arCompleted': true,
-                                          }
-                                        }
-                                      }, SetOptions(merge: true));
-                                    }
-                                    if (context.mounted) Navigator.pop(context);
-                                  },
+                                  onPressed: _endGame,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryPurple,
+                                    backgroundColor: primaryGreen,
                                     foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),

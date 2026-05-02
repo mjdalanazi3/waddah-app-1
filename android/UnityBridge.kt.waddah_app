@@ -1,0 +1,34 @@
+package com.example.waddah_app
+
+import android.app.Activity
+import android.content.Intent
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+class UnityBridge(private val activity: Activity, flutterEngine: FlutterEngine) {
+
+    companion object {
+        const val CHANNEL = "com.example.waddah_app/unity"
+        var methodChannel: MethodChannel? = null
+    }
+
+    init {
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        methodChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "launchUnity" -> {
+                    val sceneIndex = call.argument<Int>("sceneIndex") ?: 0
+                    launchUnity(sceneIndex)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    private fun launchUnity(sceneIndex: Int) {
+        val intent = Intent(activity, UnityPlayerActivity::class.java)
+        intent.putExtra("sceneIndex", sceneIndex)
+        activity.startActivity(intent)
+    }
+}
