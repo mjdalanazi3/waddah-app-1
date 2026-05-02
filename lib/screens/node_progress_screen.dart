@@ -51,6 +51,18 @@ String _arInstructions(String title) {
       return 'وجّه الكاميرا وابدأ التجربة';
   }
 }
+
+int _gameSceneFromTitle(String title) {
+  switch (title) {
+    case 'كيف أتنقل':
+      return 0;
+    case 'ماذا أفعل عند الضياع':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
 String _stageKeyFromTitle(String title) {
   switch (title) {
     case 'آداب المترو':
@@ -354,13 +366,14 @@ String _stageKeyFromTitle(String title) {
                                     if (!quizCompleted) {
                                       _showLockedDialog(context, isQuiz: false);
                                     } else {
-                                     Navigator.push(
+                                    Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => ARScreen(
                                             moduleTitle: widget.moduleTitle,
                                             taskTitle: _arTaskTitle(widget.moduleTitle),
                                             instructions: _arInstructions(widget.moduleTitle),
+                                            gameScene: _gameSceneFromTitle(widget.moduleTitle),
                                           ),
                                         ),
                                       );
