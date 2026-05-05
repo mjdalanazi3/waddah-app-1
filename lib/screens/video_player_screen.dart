@@ -26,8 +26,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    // Assuming the temporary video is named video.mp4 in assets
-    _videoController = VideoPlayerController.asset('assets/video.mp4')
+    _videoController = VideoPlayerController.asset(_videoAsset)
       ..initialize().then((_) {
         if (mounted) {
           setState(() {}); // Ensure the first frame is shown and play button appears
@@ -42,6 +41,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _videoController.dispose();
     super.dispose();
   }
+  String get _videoAsset {
+  switch (_stageKey) {
+    case 'travel':
+      return 'assets/Lesson_2.mp4';
+    case 'lost':
+      return 'assets/Lesson_3.mp4';
+    case 'aedab':
+    default:
+      return 'assets/Lesson_1.mp4';
+  }
+}
 
   String get _stageKey {
     switch (widget.videoTitle) {

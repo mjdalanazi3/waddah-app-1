@@ -20,6 +20,12 @@ class NodeProgressScreen extends StatefulWidget {
 }
 
 class _NodeProgressScreenState extends State<NodeProgressScreen> {
+  static const List<String> _avatarEmojis = [
+    '👦', '👧', '🦸‍♂️', '🦸‍♀️', '🤴', '👸', '😎', '🤓',
+    '🌸', '⭐', '🚀', '🎨', '🦁', '🐼', '🦄', '🎮',
+  ];
+
+
 String _arTaskTitle(String title) {
   switch (title) {
     case 'آداب المترو':
@@ -79,6 +85,7 @@ String _stageKeyFromTitle(String title) {
         }
 
         final int stars = (userData?['stars'] as int?) ?? 0;
+        final int avatarIndex = ((userData?['avatarIndex'] as int?) ?? 0).clamp(0, _avatarEmojis.length - 1);
         final completedStages = (userData?['completedStages'] as Map<String, dynamic>?) ?? {};
         final stageData = completedStages[stageKey] as Map<String, dynamic>? ?? {};
         final bool lessonCompleted = stageData['lessonCompleted'] == true;
@@ -210,15 +217,18 @@ String _stageKeyFromTitle(String title) {
                               const SizedBox(width: 8),
                               // Small emoji avatar
                               Container(
-                                width: 32,
-                                height: 32,
+                                width: 42,
+                                height: 42,
                                 decoration: const BoxDecoration(
                                   color: Color(0xFFF3E8FF),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Center(
-                                  child: Text('👦', style: TextStyle(fontSize: 18)),
-                                ),
+                                  child: Center(
+                        child: Text(
+                          _avatarEmojis[avatarIndex],
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
                               ),
                             ],
                           ),
@@ -407,9 +417,9 @@ String _stageKeyFromTitle(String title) {
   }) {
     // Note: Numbers in the design are written in Arabic numerals for 2 and 3.
     // However, the font might handle it, or we explicitly provide it.
-    // The design shows: 1 for first (or an 'I' shape), ٢ for second, ٣ for third.
+   
     String displayNum = number;
-    if (number == '1') displayNum = '١'; // Wait, in the image it looks like the english 'I' or '1' but let's use Arabic numeral ١
+    if (number == '1') displayNum = '١'; 
     if (number == '2') displayNum = '٢';
     if (number == '3') displayNum = '٣';
 

@@ -26,7 +26,6 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
   }
 
   void _onScaleChanged() {
-    // Extract the scale from the transformation matrix
     final scale = _transformationController.value.getMaxScaleOnAxis();
     if (scale != _currentScale) {
       setState(() {

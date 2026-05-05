@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'personal_info_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -33,9 +34,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     {'emoji': '🎮', 'label': 'لاعب'},
   ];
 
-  Future<void> _logout() async {
+  Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-    // AuthGate's StreamBuilder on authStateChanges() handles navigation back to LoginScreen automatically.
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -56,14 +62,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return const Scaffold(body: SizedBox.shrink());
         }
 
-        final userDoc = snapshot.data?.data() ?? {};
+       final userDoc = snapshot.data?.data() ?? {};
         final userName = userDoc['displayName'] as String? ?? currentUser.displayName ?? 'طالب';
         final stars = userDoc['stars'] as int? ?? 0;
         final selectedAvatarIndex = userDoc['avatarIndex'] as int? ?? _selectedAvatarIndex;
         final completedStages = (userDoc['completedStages'] as Map<String, dynamic>?) ?? {};
-        final tasksCompleted = completedStages.length;
         final taskTotal = 3;
-        final progressPercent = taskTotal > 0 ? ((tasksCompleted / taskTotal) * 100).round() : 0;
+        final tasksCompleted = completedStages.length.clamp(0, taskTotal);
 
         return Scaffold(
           body: Container(
@@ -368,7 +373,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Logout Button
                 ElevatedButton(
-                  onPressed: _logout,
+                  onPressed: () => _logout(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE53935), // Red
                     foregroundColor: Colors.white,
