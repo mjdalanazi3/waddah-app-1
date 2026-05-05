@@ -31,7 +31,7 @@ class ProgressScreen extends StatelessWidget {
         final int stars = (data?['stars'] as int?) ?? 0;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FE), // Light background
+          backgroundColor: const Color(0xFFF8F9FE),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 40),
         child: Column(
@@ -110,7 +110,7 @@ class ProgressScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'رائع يا $userName',
+                            '$userName رائع يا',
                             style: GoogleFonts.cairo(
                               color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,

@@ -20,16 +20,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: _emailController.text.trim(),
       );
-      
-      _showSnackBar('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', isSuccess: true);
-      
+
+      _showSnackBar('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني',
+          isSuccess: true);
+
       if (mounted) {
-        // Pop after a short delay so the user sees the success message
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) Navigator.pop(context);
         });
@@ -57,9 +57,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold),
+          style: GoogleFonts.cairo(
+              color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: isSuccess ? const Color(0xFF00C853) : Colors.redAccent,
+        backgroundColor:
+            isSuccess ? const Color(0xFF00C853) : Colors.redAccent,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -91,7 +93,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0, vertical: 16.0),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: Card(
@@ -107,13 +110,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Logo 
+                        // Logo
                         Center(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.asset(
-                              'assets/logo.png',
-                              height: 100,
+                              'assets/UI/RoundLogo.png',
+                              height: 120,
                               width: 100,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
@@ -132,7 +135,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Title
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -152,7 +155,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        
+
                         // Subtitle
                         Text(
                           'لا تقلق! سنساعدك في استعادة\nحسابك',
@@ -165,19 +168,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        
-                        // Email Label
-                        Text(
-                          'أدخل بريدك الإلكتروني',
-                          style: GoogleFonts.cairo(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF333333),
+
+                        // Email Label — right aligned
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'أدخل بريدك الإلكتروني',
+                            style: GoogleFonts.cairo(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF333333),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Email TextField
+
+                        // Email TextField — right aligned
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFF9FAFB),
@@ -190,7 +196,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           child: TextField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: GoogleFonts.cairo(fontSize: 14, color: Colors.black87),
+                            textAlign: TextAlign.right,
+                            style: GoogleFonts.cairo(
+                                fontSize: 14, color: Colors.black87),
                             decoration: InputDecoration(
                               hintText: 'بريدك الإلكتروني المسجل',
                               hintStyle: GoogleFonts.cairo(
@@ -198,17 +206,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 fontSize: 14,
                               ),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                              // Image shows the mail icon on the visual right/left. 
-                              // Since it's RTL, suffixIcon is on the visual left usually, 
-                              // but suffixIcon means 'end of text'. RTL end of text is left.
-                              suffixIcon: const Icon(Icons.mail_outline, color: Color(0xFFB794F6)), 
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 16),
+                              suffixIcon: const Icon(Icons.mail_outline,
+                                  color: Color(0xFFB794F6)),
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Helper Text underneath field
+
+                        // Helper text
                         Text(
                           'سنرسل لك رسالة بها رابط لإعادة تعيين كلمة المرور',
                           style: GoogleFonts.cairo(
@@ -219,12 +226,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
-                        
+
                         // Reset Button
                         ElevatedButton(
                           onPressed: _isLoading ? null : _resetPassword,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFA855F7), // Light purple
+                            backgroundColor: const Color(0xFFA855F7),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -244,7 +251,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text('📧', style: TextStyle(fontSize: 16)),
+                                    const Text('📧',
+                                        style: TextStyle(fontSize: 16)),
                                     const SizedBox(width: 8),
                                     Text(
                                       'إرسال رابط إعادة التعيين',
@@ -257,12 +265,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Back to login button
                         TextButton(
-                          onPressed: () {
-                            Navigator.pop(context); // Go back to login
-                          },
+                          onPressed: () => Navigator.pop(context),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,
@@ -276,12 +282,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 style: GoogleFonts.cairo(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF475569), // Slate grey
+                                  color: const Color(0xFF475569),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               const Icon(
-                                Icons.arrow_back, // In RTL, this explicitly points to the conceptual right '->'
+                                Icons.arrow_back,
                                 size: 18,
                                 color: Color(0xFF475569),
                               ),

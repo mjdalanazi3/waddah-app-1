@@ -36,7 +36,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
 
   void _zoom(double factor) {
     if (_transformationController.value == Matrix4.identity() && factor < 1.0) {
-      return; // Already min
+      return; 
     }
     
     final currentMatrix = _transformationController.value;
@@ -46,7 +46,6 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
     newScale = newScale.clamp(1.0, 5.0); // Assuming 1.0 is min and 5.0 is max
 
     final double scaleFactor = newScale / scale;
-    // ignore: deprecated_member_use
     final scaledMatrix = currentMatrix.clone()..scale(scaleFactor, scaleFactor, scaleFactor);
     _transformationController.value = scaledMatrix;
   }
@@ -57,7 +56,6 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 100% scaled as integer String
     String scalePercentage = '${(_currentScale * 100).toInt()}%';
 
     return Scaffold(
@@ -67,9 +65,12 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFDCCDF3), // Soft purple top
-              Color(0xFFC7EBE6), // Seafoam green bottom
+              Color(0xFFC9A8F0),
+              Color(0xFFA8E8C8),
+              Color(0xFFC0CDE0),
+              Color(0xFFC9A8F0),
             ],
+            stops: [0.0, 0.35, 0.65, 1.0],
           ),
         ),
         child: SafeArea(
@@ -81,7 +82,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                 child: Row(
                   textDirection: TextDirection.rtl,
                   children: [
-                    // Back Button (Conceptual right -> points left but in RTL context it's right pointing arrow)
+                    // Back Button
                     Container(
                       width: 48,
                       height: 48,
@@ -105,7 +106,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
   flex: 3,
   child: Center(
     child: Transform.translate(
-      offset: const Offset(25, 0), //  يحركه يمين
+      offset: const Offset(25, 0), 
       child: Image.asset(
         'assets/UI/RoundLogo.png',
         height: 120,
@@ -117,14 +118,13 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
 ],
 ),
 ),
-
               // Title
               Text(
                 'خريطة مترو الرياض',
                 style: GoogleFonts.cairo(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF9d4edd),
+                  color: const Color(0xFF9810FA),
                 ),
               ),
 
@@ -165,7 +165,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3EED5), // Beige backdrop
+                      color: const Color(0xFFF3EED5),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: const [
                         BoxShadow(color: Colors.black12, blurRadius: 6),
@@ -195,7 +195,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                         ),
 
-                        // Percentage Pill (Top visual left -> in RTL, Left)
+                        // Percentage Pill
                         Positioned(
                           left: 16,
                           top: 16,
@@ -220,7 +220,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                         ),
 
-                        // Floating Action Controls (Middle visual right)
+                        // Floating Action Controls 
                         Positioned(
                           right: 16,
                           top: 16,
@@ -229,19 +229,19 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                             children: [
                               _buildMapControlButton(
                                 icon: Icons.add,
-                                color: const Color(0xFF00C853), // Green for zoom in
+                                color: const Color(0xFF00C853), 
                                 onTap: () => _zoom(1.5),
                               ),
                               const SizedBox(height: 12),
                               _buildMapControlButton(
                                 icon: Icons.remove,
-                                color: const Color(0xFF9d4edd), // Purple for zoom out
+                                color: const Color(0xFF9d4edd), 
                                 onTap: () => _zoom(0.5),
                               ),
                               const SizedBox(height: 12),
                               _buildMapControlButton(
                                 icon: Icons.open_in_full_rounded,
-                                color: const Color(0xFF1565C0), // Blue for reset zoom
+                                color: const Color(0xFF1565C0), 
                                 onTap: _resetZoom,
                               ),
                             ],
@@ -275,7 +275,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                         children: [
                           _buildLegendItem(
                             label: 'الخط البنفسجي',
-                            color: const Color(0xFFA855F7), // Purple
+                            color: const Color(0xFFA855F7), 
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط البنفسجي',
@@ -289,7 +289,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                           _buildLegendItem(
                             label: 'الخط الأصفر',
-                            color: const Color(0xFFF59E0B),  // Yellow
+                            color: const Color(0xFFF59E0B),  
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط الأصفر',
@@ -304,7 +304,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                           _buildLegendItem(
                             label: 'الخط الأزرق',
-                            color: const Color(0xFF3B82F6),  // Blue
+                            color: const Color(0xFF3B82F6),  
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط الأزرق',
@@ -327,7 +327,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                         children: [
                           _buildLegendItem(
                             label: 'الخط الأحمر',
-                            color: const Color(0xFFEF4444), // Red
+                            color: const Color(0xFFEF4444), 
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط الأحمر',
@@ -343,7 +343,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                           _buildLegendItem(
                             label: 'الخط البرتقالي',
-                            color: const Color(0xFFF97316), // Orange
+                            color: const Color(0xFFF97316), 
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط البرتقالي',
@@ -358,7 +358,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                           ),
                           _buildLegendItem(
                             label: 'الخط الأخضر',
-                            color: const Color(0xFF10B981), // Green
+                            color: const Color(0xFF10B981), 
                             onTap: () => _showLineInfoDialog(
                               context,
                               'الخط الأخضر',
@@ -406,12 +406,11 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
     );
   }
 
-  // To properly render the text on the right and line on the left or top-line style
   Widget _buildLegendItem({required String label, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        color: Colors.transparent, // Ensure gesture area hits
+        color: Colors.transparent, 
         padding: const EdgeInsets.all(4.0),
         child: Column(
           children: [
@@ -463,7 +462,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Compact
+              mainAxisSize: MainAxisSize.min, 
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 // Line visual identifier
@@ -498,11 +497,11 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
                 ),
                 const SizedBox(height: 16.0),
 
-                // Info Section: start-end
+                // Info Section
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9), // Light slaty background
+                    color: const Color(0xFFF1F5F9), 
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -537,7 +536,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
 
                 // Stations List
                 Container(
-                  constraints: const BoxConstraints(maxHeight: 180), // Don't let list get too long
+                  constraints: const BoxConstraints(maxHeight: 180),
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),

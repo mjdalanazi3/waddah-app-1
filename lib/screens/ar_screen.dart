@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'feedback_screen.dart';
 
 class ARScreen extends StatefulWidget {
   final String moduleTitle;
@@ -25,36 +28,209 @@ class ARScreen extends StatefulWidget {
 class _ARScreenState extends State<ARScreen> {
   static const _channel = MethodChannel('com.example.waddah_app/unity');
   bool _audioEnabled = false;
+  bool _isSpeaking = false;
+  late FlutterTts _flutterTts;
 
   static const Color primaryPurple = Color(0xFF9810FA);
   static const Color primaryGreen = Color(0xFF00C950);
-  static const Color lightPurple = Color(0xFFE8D5F5);
+  static const Color lightPurple = Color(0xFFEDE7F6);
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  void _initTts() {
+    _flutterTts = FlutterTts();
+    _flutterTts.setLanguage('ar-SA');
+    _flutterTts.setSpeechRate(0.5);
+    _flutterTts.setPitch(1.0);
+    _flutterTts.setCompletionHandler(() {
+      if (mounted) setState(() => _isSpeaking = false);
+    });
+  }
+
+  Future<void> _toggleAudio() async {
+    if (_isSpeaking) {
+      await _flutterTts.stop();
+      setState(() {
+        _isSpeaking = false;
+        _audioEnabled = false;
+      });
+    } else {
+      setState(() {
+        _audioEnabled = true;
+        _isSpeaking = true;
+      });
+      await _flutterTts.speak(widget.instructions);
+    }
+  }
+
+  @override
+  void dispose() {
+    _flutterTts.stop();
+    super.dispose();
+  }
+
+  Future<void> _handleStartGame() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      _launchUnity();
+    } else {
+      _showCameraPermissionDialog();
+    }
+  }
+
+  void _showCameraPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    color: primaryPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 36),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'السماح بالوصول للكاميرا',
+                  style: GoogleFonts.cairo(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1A1A1A),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'تحتاج تجربة الواقع المعزز إلى استخدام الكاميرا، هل تسمح بذلك؟',
+                  style: GoogleFonts.cairo(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF666666),
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          final result = await Permission.camera.request();
+                          if (result.isGranted) {
+                            _launchUnity();
+                          } else if (result.isPermanentlyDenied) {
+                            openAppSettings();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryPurple,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'نعم، السماح',
+                          style: GoogleFonts.cairo(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFFDDDDDD)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'لا',
+                          style: GoogleFonts.cairo(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF666666),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _launchUnity() async {
     try {
-      await _channel.invokeMethod('launchUnity', {
-        'sceneIndex': widget.gameScene,
-      });
+      await _channel.invokeMethod('launchUnity', {'sceneIndex': widget.gameScene});
     } catch (e) {
       debugPrint('Error launching Unity: $e');
     }
   }
 
   Future<void> _endGame() async {
+    await _flutterTts.stop();
+    const int arEarnedStars = 20;
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({
-        'completedStages': {
-          widget.moduleTitle: {
-            'arCompleted': true,
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'stars': FieldValue.increment(arEarnedStars),
+          'completedStages': {
+            widget.moduleTitle: {'arCompleted': true}
           }
-        }
-      }, SetOptions(merge: true));
+        }, SetOptions(merge: true));
+      } catch (e) {
+        debugPrint('Firebase write error in AR bypassed: $e');
+      }
     }
-    if (mounted) Navigator.pop(context);
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FeedbackScreen(
+            totalQuestions: 1,
+            correctAnswers: 1,
+            earnedStars: arEarnedStars,
+            stageKey: widget.moduleTitle,
+            stageTitle: widget.moduleTitle,
+            source: FeedbackSource.arGame,
+            arTaskTitle: widget.taskTitle,
+            arInstructions: widget.instructions,
+            arGameScene: widget.gameScene,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -62,6 +238,7 @@ class _ARScreenState extends State<ARScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -76,81 +253,179 @@ class _ARScreenState extends State<ARScreen> {
                 stops: [0.0, 0.35, 0.65, 1.0],
               ),
             ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // Top bar
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 16, right: 16, top: 8, bottom: 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const SizedBox(width: 50),
-                        Image.asset('assets/UI/RoundLogo.png', height: 120),
-                        const SizedBox(width: 50),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // Top bar
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/UI/RoundLogo.png',
+                      height: 90,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.train, size: 60, color: primaryPurple),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  'ألعاب الواقع المعزز',
+                  style: GoogleFonts.cairo(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: primaryPurple,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // White card
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
-                  ),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Module title pill
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: lightPurple,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('🚇',
+                                        style: TextStyle(fontSize: 16)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      widget.moduleTitle,
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: primaryPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
 
-                  Text(
-                    'ألعاب الواقع المعزز',
-                    style: GoogleFonts.cairo(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: primaryPurple,
-                    ),
-                  ),
-                  Text(
-                    'استكشف يا مبدع',
-                    style: GoogleFonts.cairo(
-                      fontSize: 14,
-                      color: primaryPurple,
-                    ),
-                  ),
+                            const SizedBox(height: 14),
 
-                  const SizedBox(height: 4),
+                            // Task title
+                            Text(
+                              widget.taskTitle,
+                              style: GoogleFonts.cairo(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1A1A1A),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
 
-                  // White card
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                          left: 16, right: 16, bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Module title pill
-                              Center(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: lightPurple,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                            const SizedBox(height: 20),
+
+                            // Camera preview placeholder
+                            GestureDetector(
+                              onTap: _showCameraPermissionDialog,
+                              child: Container(
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: const Color(0xFFD0D0D0),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
-                                      const Text('🚇',
-                                          style: TextStyle(fontSize: 14)),
+                                      // Grey background with subtle pattern feel
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFBDBDBD),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                      // Dimmed overlay
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                      // Purple camera circle
+                                      Container(
+                                        width: 72,
+                                        height: 72,
+                                        decoration: const BoxDecoration(
+                                          color: primaryPurple,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 12,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.camera_alt_rounded,
+                                          color: Colors.white,
+                                          size: 36,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Instructions card
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: lightPurple,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                    color: primaryPurple.withOpacity(0.2)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.info_outline_rounded,
+                                          color: primaryPurple, size: 22),
                                       const SizedBox(width: 8),
                                       Text(
-                                        widget.moduleTitle,
+                                        'التعليمات',
                                         style: GoogleFonts.cairo(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -159,176 +434,161 @@ class _ARScreenState extends State<ARScreen> {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Task title
-                              Text(
-                                widget.taskTitle,
-                                style: GoogleFonts.cairo(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF1A1A1A),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // Instructions
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 20,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF8B4513),
-                                      borderRadius: BorderRadius.circular(4),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    widget.instructions,
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 15,
+                                      color: const Color(0xFF333333),
+                                      height: 1.8,
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'التعليمات',
-                                          style: GoogleFonts.cairo(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: primaryPurple,
-                                          ),
-                                        ),
-                                        Text(
-                                          widget.instructions,
-                                          style: GoogleFonts.cairo(
-                                            fontSize: 14,
-                                            color: const Color(0xFF444444),
-                                            height: 1.5,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    textAlign: TextAlign.right,
                                   ),
                                 ],
                               ),
+                            ),
 
-                              const Spacer(),
+                            const SizedBox(height: 16),
 
-                              // Audio toggle
-                              SizedBox(
-                                width: double.infinity,
-                                height: 46,
-                                child: ElevatedButton.icon(
-                                  onPressed: () => setState(
-                                      () => _audioEnabled = !_audioEnabled),
-                                  iconAlignment: IconAlignment.end,
-                                  icon: Icon(
-                                    _audioEnabled
-                                        ? Icons.volume_up
-                                        : Icons.volume_off,
-                                    size: 20,
+                            // Audio toggle
+                            GestureDetector(
+                              onTap: _toggleAudio,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: _audioEnabled
+                                      ? primaryGreen.withOpacity(0.08)
+                                      : const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: _audioEnabled
+                                        ? primaryGreen
+                                        : const Color(0xFFDDDDDD),
+                                    width: 1.5,
                                   ),
-                                  label: Text(
-                                    _audioEnabled
-                                        ? 'السرد الصوتي مفعّل'
-                                        : 'السرد الصوتي مفعّل',
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(
+                                      _isSpeaking
+                                          ? Icons.stop_circle_rounded
+                                          : Icons.play_circle_rounded,
+                                      color: _audioEnabled
+                                          ? primaryGreen
+                                          : const Color(0xFFAAAAAA),
+                                      size: 28,
                                     ),
+                                    Text(
+                                      _isSpeaking
+                                          ? 'جاري قراءة التعليمات...'
+                                          : _audioEnabled
+                                              ? 'اضغط لإيقاف السرد'
+                                              : 'اضغط لسماع التعليمات',
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: _audioEnabled
+                                            ? primaryGreen
+                                            : const Color(0xFF888888),
+                                      ),
+                                    ),
+                                    Icon(
+                                      _isSpeaking
+                                          ? Icons.volume_up_rounded
+                                          : Icons.volume_off_rounded,
+                                      color: _audioEnabled
+                                          ? primaryGreen
+                                          : const Color(0xFFAAAAAA),
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Start game button — checks permission then launches Unity
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: _handleStartGame,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryPurple,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
                                   ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryGreen,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
+                                  elevation: 0,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.play_arrow_rounded,
+                                        size: 28),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'ابدأ اللعبة',
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    elevation: 0,
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // End game button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton(
+                                onPressed: _endGame,
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                      color: primaryGreen, width: 1.5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Text(
+                                  'إنهاء اللعبة',
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryGreen,
                                   ),
                                 ),
                               ),
-
-                              const SizedBox(height: 10),
-
-                              // Launch Unity button
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton.icon(
-                                  onPressed: _launchUnity,
-                                  iconAlignment: IconAlignment.end,
-                                  icon: const Icon(Icons.play_arrow_rounded,
-                                      size: 24),
-                                  label: Text(
-                                    'ابدأ اللعبة',
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryPurple,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // End game button
-                              SizedBox(
-                                width: double.infinity,
-                                height: 46,
-                                child: ElevatedButton(
-                                  onPressed: _endGame,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryGreen,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(
-                                    'إنهاء اللعبة',
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
 
-          // Return button
+          // Back button
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
-                width: 50,
-                height: 50,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -340,7 +600,7 @@ class _ARScreenState extends State<ARScreen> {
                 child: const Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: primaryGreen,
-                  size: 22,
+                  size: 20,
                 ),
               ),
             ),

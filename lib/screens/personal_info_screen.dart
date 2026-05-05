@@ -261,11 +261,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE9D4FF),
-              Color(0xFFB9F8CF),
-              Color(0xFFE9D4FF),
+              Color(0xFFC9A8F0),
+              Color(0xFFA8E8C8),
+              Color(0xFFC0CDE0),
+              Color(0xFFC9A8F0),
             ],
-            stops: [0.0, 0.5, 1.0],
+            stops: [0.0, 0.35, 0.65, 1.0],
           ),
         ),
         child: SafeArea(

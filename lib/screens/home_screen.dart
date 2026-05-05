@@ -205,7 +205,7 @@ class HomeScreen extends StatelessWidget {
                   child: _buildLevelButton(
                     label: 'كيف أتنقل',
                     isLocked: !aedabArDone,
-                    color: const Color(0xFF5191FD),
+                    color: const Color(0xFF155DFC),
                     number: '٢',
                   ),
                 ),
@@ -228,7 +228,7 @@ class HomeScreen extends StatelessWidget {
                   child: _buildLevelButton(
                     label: 'ماذا أفعل\nعند الضياع',
                     isLocked: !travelArDone,
-                    color: const Color(0xFF2E7D32),
+                    color: const Color(0xFF00A63E),
                     number: '٣',
                   ),
                 ),
