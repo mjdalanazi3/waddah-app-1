@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -35,13 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         final user = FirebaseAuth.instance.currentUser;
         final userName = user?.displayName ?? user?.email ?? 'مستخدم';
-        
-        Navigator.pushReplacement(
+
+        // Navigate and clear the stack so user cannot go back to login
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen(userName: userName)),
+          (route) => false,
         );
       }
-      // AuthGate's StreamBuilder on authStateChanges() handles navigation automatically.
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ أثناء تسجيل الدخول';
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
@@ -65,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Text(
           message,
+          textAlign: TextAlign.right,
           style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.redAccent,
@@ -86,23 +88,23 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // The gradient background exactly as defined in the rules
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
             colors: [
-              Color.fromRGBO(218, 178, 255, 1),
-              Color.fromRGBO(185, 248, 207, 1),
-              Color.fromRGBO(233, 212, 255, 1),
+              Color(0xFFC9A8F0),
+              Color(0xFFA8E8C8),
+              Color(0xFFC0CDE0),
+              Color(0xFFC9A8F0),
             ],
+            stops: [0.0, 0.35, 0.65, 1.0],
           ),
         ),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              // ConstrainedBox handles safe maximum width for larger iPads or web ensuring the design looks sleek
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: Card(
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(16),
                             child: Image.asset(
                               'assets/UI/RoundLogo.png',
-                              height: 100,
+                              height: 115,
                               width: 100,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
@@ -143,8 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
-                        // Title
+
                         Text(
                           'مرحبًا بك في وضاح',
                           textAlign: TextAlign.center,
@@ -155,8 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Subtitle
+
                         Text(
                           'سجل دخولك لمتابعة مغامرتك التعليمية',
                           textAlign: TextAlign.center,
@@ -167,19 +167,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        
-                        // Email Label
-                        Text(
-                          'البريد الإلكتروني',
-                          style: GoogleFonts.cairo(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF333333),
+
+                        // Email Label - Fixed with child:
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'البريد الإلكتروني',
+                            style: GoogleFonts.cairo(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF333333),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Email TextField
+
                         _buildTextField(
                           controller: _emailController,
                           hintText: 'أدخل بريدك الإلكتروني',
@@ -187,19 +189,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 20),
-                        
-                        // Password Label
-                        Text(
-                          'كلمة المرور',
-                          style: GoogleFonts.cairo(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF333333),
+
+                        // Password Label - Fixed with child:
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'كلمة المرور',
+                            style: GoogleFonts.cairo(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF333333),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Password TextField
+
                         _buildTextField(
                           controller: _passwordController,
                           hintText: 'أدخل كلمة المرور',
@@ -213,8 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Forgot Password Link
+
+                        // Forgot Password Link - Fixed with child:
                         Align(
                           alignment: AlignmentDirectional.centerEnd,
                           child: TextButton(
@@ -227,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             },
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                              padding: EdgeInsets.zero,
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -242,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Login Button
                         ElevatedButton(
                           onPressed: _isLoading ? null : _login,
@@ -265,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : Text(
-                                  'هيا بنا🚀',
+                                  '🚀 هيا بنا',
                                   style: GoogleFonts.cairo(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -273,20 +277,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                         ),
                         const SizedBox(height: 24),
-                        
-                        // Sign up prompt
+
+                        // Sign Up Row (Fixed order: Question Right, Button Left)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'جديد في وضاح؟',
-                              style: GoogleFonts.cairo(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const SizedBox(width: 4),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -306,6 +301,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF00C853),
                                 ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'جديد في وضاح؟',
+                              style: GoogleFonts.cairo(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
                               ),
                             ),
                           ],
@@ -336,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
         color: const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFD0B3E1), // Light purple border
+          color: const Color(0xFFD0B3E1),
           width: 1.5,
         ),
       ),
@@ -344,6 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
+        textAlign: TextAlign.right,
         style: GoogleFonts.cairo(fontSize: 14, color: Colors.black87),
         decoration: InputDecoration(
           hintText: hintText,
@@ -353,8 +358,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          // In RTL mode, suffixIcon natively appears on the right side. We want the main icon on the right (suffix)
-          // and the interactive eye icon on the left (prefix).
           suffixIcon: Icon(icon, color: const Color(0xFFB794F6)),
           prefixIcon: isPassword
               ? IconButton(

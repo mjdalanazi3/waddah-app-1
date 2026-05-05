@@ -180,9 +180,12 @@ final Map<String, Map<String, dynamic>> _stageData = {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFCCB6FF),
-              Color(0xFFB4F5DD),
+              Color(0xFFC9A8F0),
+              Color(0xFFA8E8C8),
+              Color(0xFFC0CDE0),
+              Color(0xFFC9A8F0),
             ],
+            stops: [0.0, 0.35, 0.65, 1.0],
           ),
         ),
         child: SafeArea(
@@ -239,7 +242,7 @@ final Map<String, Map<String, dynamic>> _stageData = {
                         style: GoogleFonts.cairo(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF7C33FF),
+                          color: const Color(0xFF9810FA),
                         ),
                       ),
                     ],
