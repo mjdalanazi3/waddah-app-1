@@ -67,6 +67,9 @@ flutter:
     - assets/UI/HomePage.png
     - assets/UI/RoundLogo.png
     - assets/map.png
+    - assets/Lesson_1.mp4
+    - assets/Lesson_2.mp4
+    - assets/Lesson_3.mp4
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
