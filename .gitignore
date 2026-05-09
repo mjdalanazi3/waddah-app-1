@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Unity build outputs
+ios_xcode/build/
+ios_xcode/UnityLibrary/Il2CppOutputProject/
+ios/Frameworks/
+ios/UnityLibrary/
+*.a
+*.dSYM
