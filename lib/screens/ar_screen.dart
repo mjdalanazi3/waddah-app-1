@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_unity_widget/flutter_unity_widget.dart';
 import 'feedback_screen.dart';
 
 class ARScreen extends StatefulWidget {
@@ -26,7 +26,9 @@ class ARScreen extends StatefulWidget {
 }
 
 class _ARScreenState extends State<ARScreen> {
-  static const _channel = MethodChannel('com.example.waddah_app/unity');
+  UnityWidgetController? _unityWidgetController;
+  bool _showUnity = false;
+  bool _unityReady = false;
   bool _audioEnabled = false;
   bool _isSpeaking = false;
   late FlutterTts _flutterTts;
@@ -70,17 +72,60 @@ class _ARScreenState extends State<ARScreen> {
   @override
   void dispose() {
     _flutterTts.stop();
+    _unityWidgetController?.dispose();
     super.dispose();
   }
 
-  Future<void> _handleStartGame() async {
-    final status = await Permission.camera.status;
-    if (status.isGranted) {
-      _launchUnity();
+Future<void> _requestCameraPermission() async {
+  final status = await Permission.camera.status;
+  if (status.isGranted) {
+    // Already granted — show a small confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '✅ تم السماح بالوصول للكاميرا',
+          style: GoogleFonts.cairo(),
+          textAlign: TextAlign.right,
+        ),
+        backgroundColor: primaryGreen,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  } else {
+    // Show custom dialog first, then native popup follows
+    _showCameraPermissionDialog();
+  }
+}
+
+Future<void> _handleStartGame() async {
+  final status = await Permission.camera.status;
+  if (status.isGranted) {
+    setState(() => _showUnity = true);
+  } else {
+    final result = await Permission.camera.request();
+    if (result.isGranted) {
+      setState(() => _showUnity = true);
+    } else if (result.isPermanentlyDenied) {
+      openAppSettings();
     } else {
       _showCameraPermissionDialog();
     }
   }
+}
+
+void _onUnityCreated(UnityWidgetController controller) {
+  _unityWidgetController = controller;
+  debugPrint('=== LOADING SCENE: ${widget.gameScene} ===');
+  Future.delayed(const Duration(seconds: 3), () {
+    if (mounted) {
+      controller.postMessage(
+        'FlutterBridge',
+        'LoadScene',
+        widget.gameScene.toString(),
+      );
+    }
+  });
+}
 
   void _showCameraPermissionDialog() {
     showDialog(
@@ -102,7 +147,8 @@ class _ARScreenState extends State<ARScreen> {
                     color: primaryPurple,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 36),
+                  child: const Icon(Icons.camera_alt_rounded,
+                      color: Colors.white, size: 36),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -134,7 +180,7 @@ class _ARScreenState extends State<ARScreen> {
                           Navigator.pop(context);
                           final result = await Permission.camera.request();
                           if (result.isGranted) {
-                            _launchUnity();
+                            setState(() => _showUnity = true);
                           } else if (result.isPermanentlyDenied) {
                             openAppSettings();
                           }
@@ -147,11 +193,9 @@ class _ARScreenState extends State<ARScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           elevation: 0,
                         ),
-                        child: Text(
-                          'نعم، السماح',
-                          style: GoogleFonts.cairo(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
+                        child: Text('نعم، السماح',
+                            style: GoogleFonts.cairo(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -164,14 +208,12 @@ class _ARScreenState extends State<ARScreen> {
                               borderRadius: BorderRadius.circular(14)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: Text(
-                          'لا',
-                          style: GoogleFonts.cairo(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF666666),
-                          ),
-                        ),
+                        child: Text('لا',
+                            style: GoogleFonts.cairo(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF666666),
+                            )),
                       ),
                     ),
                   ],
@@ -184,18 +226,9 @@ class _ARScreenState extends State<ARScreen> {
     );
   }
 
-  Future<void> _launchUnity() async {
-    try {
-      await _channel.invokeMethod('launchUnity', {'sceneIndex': widget.gameScene});
-    } catch (e) {
-      debugPrint('Error launching Unity: $e');
-    }
-  }
-
   Future<void> _endGame() async {
     await _flutterTts.stop();
     const int arEarnedStars = 20;
-
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -209,10 +242,9 @@ class _ARScreenState extends State<ARScreen> {
           }
         }, SetOptions(merge: true));
       } catch (e) {
-        debugPrint('Firebase write error in AR bypassed: $e');
+        debugPrint('Firebase error: $e');
       }
     }
-
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -235,10 +267,77 @@ class _ARScreenState extends State<ARScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Show Unity fullscreen when game starts
+    if (_showUnity) {
+      return Scaffold(
+        body: Stack(
+          children: [
+            UnityWidget(
+              onUnityCreated: _onUnityCreated,
+              useAndroidViewSurface: false,
+              fullscreen: false,
+            ),
+            // End game button overlay
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _endGame,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 14),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'إنهاء اللعبة',
+                    style: GoogleFonts.cairo(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+            // Back button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _showUnity = false;
+                  _unityReady = false;
+                }),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.arrow_forward_ios_rounded,
+                      color: primaryGreen, size: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Normal AR screen UI
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -254,25 +353,23 @@ class _ARScreenState extends State<ARScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
-                // Top bar
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                  padding:
+                      const EdgeInsets.only(left: 16, right: 16, top: 8),
                   child: Center(
                     child: Image.asset(
                       'assets/UI/RoundLogo.png',
                       height: 90,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.train, size: 60, color: primaryPurple),
+                          const Icon(Icons.train,
+                              size: 60, color: primaryPurple),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   'ألعاب الواقع المعزز',
                   style: GoogleFonts.cairo(
@@ -281,13 +378,11 @@ class _ARScreenState extends State<ARScreen> {
                     color: primaryPurple,
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
-                // White card
                 Expanded(
                   child: Container(
-                    margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    margin: const EdgeInsets.only(
+                        left: 16, right: 16, bottom: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(28),
@@ -307,7 +402,6 @@ class _ARScreenState extends State<ARScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Module title pill
                             Center(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -334,10 +428,7 @@ class _ARScreenState extends State<ARScreen> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 14),
-
-                            // Task title
                             Text(
                               widget.taskTitle,
                               style: GoogleFonts.cairo(
@@ -347,9 +438,7 @@ class _ARScreenState extends State<ARScreen> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-
                             const SizedBox(height: 20),
-
                             // Camera preview placeholder
                             GestureDetector(
                               onTap: _showCameraPermissionDialog,
@@ -357,57 +446,38 @@ class _ARScreenState extends State<ARScreen> {
                                 height: 180,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: const Color(0xFFD0D0D0),
+                                  color: const Color(0xFFBDBDBD),
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Stack(
                                     alignment: Alignment.center,
                                     children: [
-                                      // Grey background with subtle pattern feel
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFBDBDBD),
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                      ),
-                                      // Dimmed overlay
                                       Container(
                                         decoration: BoxDecoration(
                                           color: Colors.black.withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                         ),
                                       ),
-                                      // Purple camera circle
                                       Container(
                                         width: 72,
                                         height: 72,
                                         decoration: const BoxDecoration(
                                           color: primaryPurple,
                                           shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black26,
-                                              blurRadius: 12,
-                                              offset: Offset(0, 4),
-                                            ),
-                                          ],
                                         ),
                                         child: const Icon(
-                                          Icons.camera_alt_rounded,
-                                          color: Colors.white,
-                                          size: 36,
-                                        ),
+                                            Icons.camera_alt_rounded,
+                                            color: Colors.white,
+                                            size: 36),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 16),
-
-                            // Instructions card
                             Container(
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
@@ -417,21 +487,20 @@ class _ARScreenState extends State<ARScreen> {
                                     color: primaryPurple.withOpacity(0.2)),
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
                                 children: [
                                   Row(
                                     children: [
                                       const Icon(Icons.info_outline_rounded,
                                           color: primaryPurple, size: 22),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        'التعليمات',
-                                        style: GoogleFonts.cairo(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryPurple,
-                                        ),
-                                      ),
+                                      Text('التعليمات',
+                                          style: GoogleFonts.cairo(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: primaryPurple,
+                                          )),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
@@ -447,10 +516,7 @@ class _ARScreenState extends State<ARScreen> {
                                 ],
                               ),
                             ),
-
                             const SizedBox(height: 16),
-
-                            // Audio toggle
                             GestureDetector(
                               onTap: _toggleAudio,
                               child: Container(
@@ -508,10 +574,7 @@ class _ARScreenState extends State<ARScreen> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 24),
-
-                            // Start game button — checks permission then launches Unity
                             SizedBox(
                               width: double.infinity,
                               height: 56,
@@ -521,8 +584,8 @@ class _ARScreenState extends State<ARScreen> {
                                   backgroundColor: primaryPurple,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                      borderRadius:
+                                          BorderRadius.circular(18)),
                                   elevation: 0,
                                 ),
                                 child: Row(
@@ -531,21 +594,16 @@ class _ARScreenState extends State<ARScreen> {
                                     const Icon(Icons.play_arrow_rounded,
                                         size: 28),
                                     const SizedBox(width: 8),
-                                    Text(
-                                      'ابدأ اللعبة',
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    Text('ابدأ اللعبة',
+                                        style: GoogleFonts.cairo(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        )),
                                   ],
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 12),
-
-                            // End game button
                             SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -555,17 +613,15 @@ class _ARScreenState extends State<ARScreen> {
                                   side: const BorderSide(
                                       color: primaryGreen, width: 1.5),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
+                                      borderRadius:
+                                          BorderRadius.circular(16)),
                                 ),
-                                child: Text(
-                                  'إنهاء اللعبة',
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryGreen,
-                                  ),
-                                ),
+                                child: Text('إنهاء اللعبة',
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryGreen,
+                                    )),
                               ),
                             ),
                           ],
@@ -577,8 +633,6 @@ class _ARScreenState extends State<ARScreen> {
               ],
             ),
           ),
-
-          // Back button
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
@@ -597,11 +651,8 @@ class _ARScreenState extends State<ARScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: primaryGreen,
-                  size: 20,
-                ),
+                child: const Icon(Icons.arrow_forward_ios_rounded,
+                    color: primaryGreen, size: 20),
               ),
             ),
           ),

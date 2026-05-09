@@ -1,5 +1,7 @@
 import Flutter
+import UnityFramework
 import UIKit
+import flutter_unity_widget
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,6 +9,7 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    InitUnityIntegrationWithOptions(argc: CommandLine.argc, argv: CommandLine.unsafeArgv, launchOptions)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
