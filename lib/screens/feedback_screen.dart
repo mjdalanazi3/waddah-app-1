@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home_screen.dart';
 import 'quiz_screen.dart';
 import 'ar_screen.dart';
+import 'node_progress_screen.dart';
 
 enum FeedbackSource { quiz, arGame }
 
@@ -88,7 +89,7 @@ class FeedbackScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // Centered and Constrained White Card
+              // White container
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -107,7 +108,7 @@ class FeedbackScreen extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min, // Makes height only as large as content
+                      mainAxisSize: MainAxisSize.min, 
                       children: [
                         // Score
                         Text(
@@ -192,11 +193,42 @@ class FeedbackScreen extends StatelessWidget {
                           ),
                         ),
                         
+                          const SizedBox(height: 10),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NodeProgressScreen(
+                                      moduleTitle: stageTitle,
+                                    ),
+                                  ),
+                                  (route) => false,
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                side: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14)),
+                                foregroundColor: const Color(0xFF7C3AED),
+                              ),
+                              child: Text(
+                                'العودة للمرحلة',
+                                style: GoogleFonts.cairo(
+                                    fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+
                         const SizedBox(height: 10),
-                        
+
                         SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton(
+                          child: OutlinedButton.icon(
                             onPressed: () async {
                               final user = FirebaseAuth.instance.currentUser;
                               final doc = await FirebaseFirestore.instance
@@ -225,7 +257,8 @@ class FeedbackScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(14)),
                               foregroundColor: const Color(0xFF475569),
                             ),
-                            child: Text(
+                            icon: const Icon(Icons.home_rounded, size: 20),
+                            label: Text(
                               'الرئيسية',
                               style: GoogleFonts.cairo(
                                   fontSize: 16, fontWeight: FontWeight.w600),

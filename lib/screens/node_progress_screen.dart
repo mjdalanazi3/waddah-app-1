@@ -529,7 +529,7 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                 ),
                 const SizedBox(height: 24.0),
                 Text(
-                  isQuiz ? 'الاختبار مغلق!' : 'قريباً',
+                  isQuiz ? 'الاختبار مغلق!' : 'اللعبة مغلقة!', 
                   style: GoogleFonts.cairo(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -539,8 +539,8 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                 const SizedBox(height: 16.0),
                 Text(
                   isQuiz 
-                    ? 'يجب عليك إكمال الدرس للوصول إلى الاختبار'
-                    : 'هذه الميزة ستكون متاحة قريباً',
+                  ? 'يجب عليك إكمال الدرس للوصول إلى الاختبار'
+                  : 'عليك حل الاختبار أولًا للوصول إلي اللعبة',  
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cairo(
                     fontSize: 16.0,
