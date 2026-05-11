@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878211431258",
+    "project_id": "waddahapp-828fa",
+    "storage_bucket": "waddahapp-828fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878211431258:android:dc8ea92426523507eb9163",
+        "android_client_info": {
+          "package_name": "com.capstone.Waddah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDG5jbWNFaKG5RGdfCbqWNHdo5Z7C0OE5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
