@@ -1376,7 +1376,7 @@ PODS:
     - gRPC-Core/Privacy (= 1.69.0)
   - gRPC-Core/Interface (1.69.0)
   - gRPC-Core/Privacy (1.69.0)
-  - GTMSessionFetcher/Core (5.2.0)
+  - GTMSessionFetcher/Core (5.3.0)
   - leveldb-library (1.22.6)
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
@@ -1386,6 +1386,7 @@ PODS:
   - permission_handler_apple (9.3.0):
     - Flutter
   - RecaptchaInterop (101.0.0)
+  - UnityFramework (0.0.1)
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -1403,6 +1404,7 @@ DEPENDENCIES:
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - flutter_unity_widget (from `.symlinks/plugins/flutter_unity_widget/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - UnityFramework (from `../ios_xcode/UnityLibrary`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
@@ -1447,6 +1449,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_unity_widget/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  UnityFramework:
+    :path: "../ios_xcode/UnityLibrary"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   webview_flutter_wkwebview:
@@ -1472,18 +1476,19 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: bccaff90721d14bafc14be34f28b77fdd7c91dc9
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
-  flutter_unity_widget: 6383b30b50a9c9b320f5e728ef31568472cebc31
+  flutter_unity_widget: 6fde06d0f0b40b467ec79027eb9ef458e370a49c
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
-  GTMSessionFetcher: 904bdd2a82c635bcd6f44edf94cc8775c5d1d6e6
+  GTMSessionFetcher: 127211aeec0b1e904fc49f4f6f895dcc535b0ecf
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  UnityFramework: 7ca45c8dae2561bcaf3529c3950d8931a3052d6a
   video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
   webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
 
-PODFILE CHECKSUM: 622990b3c2fd392a30ac54df774d61f4585732e2
+PODFILE CHECKSUM: 54ea3489ec7b01bb9dcefcf138913f991cac570c
 
 COCOAPODS: 1.16.2

@@ -76,56 +76,63 @@ class _ARScreenState extends State<ARScreen> {
     super.dispose();
   }
 
-Future<void> _requestCameraPermission() async {
-  final status = await Permission.camera.status;
-  if (status.isGranted) {
-    // Already granted — show a small confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '✅ تم السماح بالوصول للكاميرا',
-          style: GoogleFonts.cairo(),
-          textAlign: TextAlign.right,
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '✅ تم السماح بالوصول للكاميرا',
+            style: GoogleFonts.cairo(),
+            textAlign: TextAlign.right,
+          ),
+          backgroundColor: primaryGreen,
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: primaryGreen,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  } else {
-    // Show custom dialog first, then native popup follows
-    _showCameraPermissionDialog();
-  }
-}
-
-Future<void> _handleStartGame() async {
-  final status = await Permission.camera.status;
-  if (status.isGranted) {
-    setState(() => _showUnity = true);
-  } else {
-    final result = await Permission.camera.request();
-    if (result.isGranted) {
-      setState(() => _showUnity = true);
-    } else if (result.isPermanentlyDenied) {
-      openAppSettings();
+      );
     } else {
       _showCameraPermissionDialog();
     }
   }
-}
 
-void _onUnityCreated(UnityWidgetController controller) {
-  _unityWidgetController = controller;
-  debugPrint('=== LOADING SCENE: ${widget.gameScene} ===');
-  Future.delayed(const Duration(seconds: 3), () {
-    if (mounted) {
-      controller.postMessage(
-        'FlutterBridge',
-        'LoadScene',
-        widget.gameScene.toString(),
-      );
+  Future<void> _handleStartGame() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      setState(() => _showUnity = true);
+    } else {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        setState(() => _showUnity = true);
+      } else if (result.isPermanentlyDenied) {
+        openAppSettings();
+      } else {
+        _showCameraPermissionDialog();
+      }
     }
-  });
-}
+  }
+
+  void _onUnityCreated(UnityWidgetController controller) {
+    _unityWidgetController = controller;
+    debugPrint('=== LOADING SCENE: ${widget.gameScene} ===');
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        controller.postMessage(
+          'FlutterBridge',
+          'LoadScene',
+          widget.gameScene.toString(),
+        );
+      }
+    });
+  }
+
+  // ✅ Called when Unity sends any message to Flutter
+  void _onUnityMessage(message) {
+    debugPrint('=== Unity message received: $message ===');
+    if (message.toString() == 'gameComplete') {
+      debugPrint('=== Game complete received! Ending game... ===');
+      _endGame();
+    }
+  }
 
   void _showCameraPermissionDialog() {
     showDialog(
@@ -274,6 +281,7 @@ void _onUnityCreated(UnityWidgetController controller) {
           children: [
             UnityWidget(
               onUnityCreated: _onUnityCreated,
+              onUnityMessage: _onUnityMessage, // ✅ listen for gameComplete
               useAndroidViewSurface: false,
               fullscreen: false,
             ),
@@ -357,8 +365,7 @@ void _onUnityCreated(UnityWidgetController controller) {
             child: Column(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 8),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                   child: Center(
                     child: Image.asset(
                       'assets/UI/RoundLogo.png',

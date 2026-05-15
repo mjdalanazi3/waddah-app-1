@@ -5,7 +5,7 @@ pod install --silent
 xcodebuild -workspace Unity-iPhone.xcworkspace \
   -scheme UnityFramework \
   -configuration Release \
-  -sdk iphoneos \
+  -sdk iphoneos26.4 \
   -arch arm64 \
   BUILD_DIR=/Users/jumana/waddah-app-1/ios_xcode/build \
   CODE_SIGNING_ALLOWED=NO 2>&1 | tail -3

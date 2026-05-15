@@ -15,7 +15,7 @@ class MainDashboard extends StatefulWidget {
 }
 
 class _MainDashboardState extends State<MainDashboard> {
-  int _currentIndex = 1; // Default to 'Home' (Middle tab)
+  int _currentIndex = 1;
 
   Widget _buildBody(Map<String, dynamic>? userData) {
     switch (_currentIndex) {
@@ -42,7 +42,7 @@ class _MainDashboardState extends State<MainDashboard> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: userDocStream,
       builder: (context, snapshot) {
-        // Stream may briefly emit PERMISSION_DENIED right after sign-out — handle silently.
+  
         if (snapshot.hasError) {
           return const Scaffold(body: SizedBox.shrink());
         }
@@ -54,7 +54,6 @@ class _MainDashboardState extends State<MainDashboard> {
         return Scaffold(
           body: _buildBody(userData),
           backgroundColor: Colors.white,
-          // Custom floating bottom navigation bar
           bottomNavigationBar: SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

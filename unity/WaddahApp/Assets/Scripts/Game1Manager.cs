@@ -41,8 +41,8 @@ public class Game1Manager : MonoBehaviour
     //  Map Boards
     // ─────────────────────────────────────────────
     [Header("Map Boards")]
-    public GameObject mapBoard1;                              // shown in Part 1
-    public GameObject mapBoard2;                              // shown in Part 2 (lapboard)
+    public GameObject mapBoard1;                              
+    public GameObject mapBoard2;                       
     public Vector3 mapOffsetFromTracks = new Vector3(1.5f, 0f, 0f);
 
     // ─────────────────────────────────────────────
@@ -95,11 +95,11 @@ public class Game1Manager : MonoBehaviour
         if (blueTrack != null) blueTrack.SetActive(false);
         if (orangeTrack != null) orangeTrack.SetActive(false);
         if (train != null) train.SetActive(false);
-        if (mapBoard2 != null) mapBoard2.SetActive(false);   // hide lapboard at start
+        if (mapBoard2 != null) mapBoard2.SetActive(false);   
 
         // Show Part 1 objects
         if (stationLineParent != null) stationLineParent.SetActive(true);
-        if (mapBoard1 != null) mapBoard1.SetActive(true);    // show map in Part 1
+        if (mapBoard1 != null) mapBoard1.SetActive(true);    
 
         // Hide feedback icons
         if (feedbackIconCorrect != null) feedbackIconCorrect.SetActive(false);
@@ -131,7 +131,6 @@ public class Game1Manager : MonoBehaviour
 
         if (_answerLocked) return;
 
-        // ✅ Editor shortcut for testing
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             if (_currentPart == GamePart.Part1)
@@ -141,7 +140,7 @@ public class Game1Manager : MonoBehaviour
             return;
         }
 
-        // ✅ Touch input
+        // Touch input
         if (Touchscreen.current == null) return;
 
         foreach (var touch in Touchscreen.current.touches)
@@ -219,7 +218,7 @@ public class Game1Manager : MonoBehaviour
     // ─────────────────────────────────────────────
     void HandleStationTap(int index)
     {
-        Debug.Log($"🚉 HandleStationTap: {index}, correct: {correctStationIndex}");
+        Debug.Log($"HandleStationTap: {index}, correct: {correctStationIndex}");
         if (index == correctStationIndex)
         {
             ShowFeedback(true);
@@ -239,7 +238,7 @@ public class Game1Manager : MonoBehaviour
     // ─────────────────────────────────────────────
     void HandleTrackTap(int index)
     {
-        Debug.Log($"🚆 HandleTrackTap: {index}, correct: {correctTrackIndex}");
+        Debug.Log($"HandleTrackTap: {index}, correct: {correctTrackIndex}");
         if (index == correctTrackIndex)
         {
             ShowFeedback(true);

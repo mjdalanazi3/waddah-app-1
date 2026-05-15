@@ -1,0 +1,8 @@
+No devices found yet. Checking for wireless devices...
+
+No supported devices found with name or id matching 'ios'.
+
+The following devices were found:
+iPhone 14 (mobile) • 4DEC2725-7B8F-4BD9-AC50-CA587831B724 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-26-4 (simulator)
+macOS (desktop)    • macos                                • darwin-arm64   • macOS 26.4.1 25E253 darwin-arm64
+Chrome (web)       • chrome                               • web-javascript • Google Chrome 148.0.7778.168

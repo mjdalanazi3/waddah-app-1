@@ -75,7 +75,7 @@ class FeedbackScreen extends StatelessWidget {
                   const Text('🎉', style: TextStyle(fontSize: 24)),
                   const SizedBox(width: 12),
                   Text(
-                    'أحسنت!',
+                    'أحسنت',
                     style: GoogleFonts.cairo(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -257,7 +257,10 @@ class FeedbackScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(14)),
                               foregroundColor: const Color(0xFF475569),
                             ),
-                            icon: const Icon(Icons.home_rounded, size: 20),
+                            icon: const Icon(Icons.home_rounded,
+                             size: 20,
+                             color: Color(0xFF9d4edd),
+                             ),
                             label: Text(
                               'الرئيسية',
                               style: GoogleFonts.cairo(

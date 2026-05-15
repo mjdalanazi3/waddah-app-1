@@ -43,7 +43,7 @@ class _MapViewerScreenState extends State<MapViewerScreen> {
     final scale = currentMatrix.getMaxScaleOnAxis();
     
     double newScale = scale * factor;
-    newScale = newScale.clamp(1.0, 5.0); // Assuming 1.0 is min and 5.0 is max
+    newScale = newScale.clamp(1.0, 5.0);
 
     final double scaleFactor = newScale / scale;
     final scaledMatrix = currentMatrix.clone()..scale(scaleFactor, scaleFactor, scaleFactor);

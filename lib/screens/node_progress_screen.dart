@@ -20,10 +20,6 @@ class NodeProgressScreen extends StatefulWidget {
 }
 
 class _NodeProgressScreenState extends State<NodeProgressScreen> {
-  static const List<String> _avatarEmojis = [
-    '👦', '👧', '🦸‍♂️', '🦸‍♀️', '🤴', '👸', '😎', '🤓',
-    '🌸', '⭐', '🚀', '🎨', '🦁', '🐼', '🦄', '🎮',
-  ];
   String _arTaskTitle(String title) {
     switch (title) {
       case 'آداب المترو':
@@ -50,16 +46,18 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
     }
   }
 
-  int _gameSceneFromTitle(String title) {
-    switch (title) {
-      case 'كيف أتنقل':
-        return 0;
-      case 'ماذا أفعل عند الضياع':
-        return 1;
-      default:
-        return 0;
-    }
+int _gameSceneFromTitle(String title) {
+  switch (title) {
+    case 'آداب المترو':
+      return 0;  // Game0 
+    case 'كيف أتنقل':
+      return 1;  // Game1
+    case 'ماذا أفعل عند الضياع':
+      return 2;  // Game2
+    default:
+      return 0;
   }
+}
 
   String _stageKeyFromTitle(String title) {
     switch (title) {
@@ -95,7 +93,6 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
         }
 
         final int stars = (userData?['stars'] as int?) ?? 0;
-        final int avatarIndex = ((userData?['avatarIndex'] as int?) ?? 0).clamp(0, _avatarEmojis.length - 1);
         final completedStages = (userData?['completedStages'] as Map<String, dynamic>?) ?? {};
         final stageData = completedStages[stageKey] as Map<String, dynamic>? ?? {};
         final bool lessonCompleted = stageData['lessonCompleted'] == true;
@@ -228,15 +225,15 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         Container(
-                                          width: 42,
-                                          height: 42,
+                                          width: 32,
+                                          height: 32,
                                           decoration: const BoxDecoration(
                                             color: Color(0xFFF3E8FF),
                                             shape: BoxShape.circle,
                                           ),
-                                         child: Center(
-                                  child: Text(_avatarEmojis[avatarIndex], style: const TextStyle(fontSize: 18)),
-                                ),
+                                          child: const Center(
+                                            child: Text('👦', style: TextStyle(fontSize: 18)),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -529,7 +526,7 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                 ),
                 const SizedBox(height: 24.0),
                 Text(
-                  isQuiz ? 'الاختبار مغلق!' : 'اللعبة مغلقة!', 
+                  isQuiz ? 'الاختبار مغلق!' : 'قريباً',
                   style: GoogleFonts.cairo(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -539,8 +536,8 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
                 const SizedBox(height: 16.0),
                 Text(
                   isQuiz 
-                  ? 'يجب عليك إكمال الدرس للوصول إلى الاختبار'
-                  : 'عليك حل الاختبار أولًا للوصول إلي اللعبة',  
+                    ? 'يجب عليك إكمال الدرس للوصول إلى الاختبار'
+                    : 'هذه الميزة ستكون متاحة قريباً',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cairo(
                     fontSize: 16.0,

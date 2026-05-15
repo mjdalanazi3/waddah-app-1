@@ -278,35 +278,7 @@ final Map<String, Map<String, dynamic>> _stageData = {
                 //               fontSize: 18,
                 //               color: const Color(0xFF1F2937),
                 //             ),
-                //           ),
-                //           const SizedBox(height: 8),
-                //           ..._stagePoints.map(
-                //             (point) => Padding(
-                //               padding: const EdgeInsets.symmetric(vertical: 4.0),
-                //               child: Row(
-                //                 children: [
-                //                   const Icon(Icons.check_circle, color: Color(0xFF00C853), size: 18),
-                //                   const SizedBox(width: 8),
-                //                   Expanded(
-                //                     child: Text(
-                //                       point,
-                //                       textAlign: TextAlign.right,
-                //                       style: GoogleFonts.cairo(
-                //                         fontSize: 14,
-                //                         color: const Color(0xFF334155),
-                //                         fontWeight: FontWeight.w600,
-                //                       ),
-                //                     ),
-                //                   ),
-                //                 ],
-                //               ),
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
+          
 
                 const SizedBox(height: 16),
                 Padding(
