@@ -5,7 +5,7 @@ pod install --silent
 xcodebuild -workspace Unity-iPhone.xcworkspace \
   -scheme UnityFramework \
   -configuration Release \
-  -sdk iphoneos26.4 \
+  -sdk iphoneos \
   -arch arm64 \
   BUILD_DIR=/Users/jumana/waddah-app-1/ios_xcode/build \
   CODE_SIGNING_ALLOWED=NO 2>&1 | tail -3
@@ -15,10 +15,15 @@ rm -rf /Users/jumana/waddah-app-1/ios/Frameworks/UnityFramework.framework
 cp -Rf /Users/jumana/waddah-app-1/ios_xcode/build/Release-iphoneos/UnityFramework.framework \
        /Users/jumana/waddah-app-1/ios/Frameworks/UnityFramework.framework
 
-echo "🔗 Fixing UnityExport symlink..."
+echo "📦 Setting up UnityLibrary..."
+mkdir -p /Users/jumana/waddah-app-1/ios/UnityLibrary
+cp -Rf /Users/jumana/waddah-app-1/ios_xcode/build/Release-iphoneos/UnityFramework.framework \
+       /Users/jumana/waddah-app-1/ios/UnityLibrary/UnityFramework.framework
+
+echo "📦 Copying UnityExport..."
 rm -rf /Users/jumana/waddah-app-1/ios/UnityExport
-ln -s /Users/jumana/waddah-app-1/ios_xcode/UnityLibrary \
-      /Users/jumana/waddah-app-1/ios/UnityExport
+cp -Rf /Users/jumana/waddah-app-1/ios_xcode/UnityLibrary \
+       /Users/jumana/waddah-app-1/ios/UnityExport
 
 echo "🚀 Running Flutter..."
 cd /Users/jumana/waddah-app-1

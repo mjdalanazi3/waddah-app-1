@@ -96,19 +96,7 @@ class _ARScreenState extends State<ARScreen> {
   }
 
   Future<void> _handleStartGame() async {
-    final status = await Permission.camera.status;
-    if (status.isGranted) {
-      setState(() => _showUnity = true);
-    } else {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        setState(() => _showUnity = true);
-      } else if (result.isPermanentlyDenied) {
-        openAppSettings();
-      } else {
-        _showCameraPermissionDialog();
-      }
-    }
+    setState(() => _showUnity = true);
   }
 
   void _onUnityCreated(UnityWidgetController controller) {
