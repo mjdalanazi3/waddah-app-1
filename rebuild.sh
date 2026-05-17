@@ -30,4 +30,4 @@ cd /Users/jumana/waddah-app-1
 flutter clean
 flutter pub get
 cd ios && pod install --silent && cd ..
-flutter run
+flutter run -d 00008110-000E59300129401E

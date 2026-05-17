@@ -1,22 +1,32 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using FlutterUnityIntegration;
+using System.Collections;
 
 public class FlutterBridge : MonoBehaviour
 {
     void Awake()
     {
+        Debug.Log("🔥 FlutterBridge Awake called!");
         DontDestroyOnLoad(gameObject);
     }
 
     void Start()
     {
-        // No need to send ready message - just load the default scene
-        // Flutter will call LoadScene via postMessage
+        Debug.Log("🔥 FlutterBridge Start called!");
+        StartCoroutine(SendReadyAfterDelay());
     }
 
-    // Called by Flutter via postMessage
+    IEnumerator SendReadyAfterDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        Debug.Log("🔥 Sending unityReady to Flutter");
+UnityMessageManager.Instance.SendMessageToFlutter("UnityReady");
+    }
+
     public void LoadScene(string sceneIndexStr)
     {
+        Debug.Log($"🔥 LoadScene called: {sceneIndexStr}");
         if (int.TryParse(sceneIndexStr, out int index))
         {
             SceneManager.LoadScene(index);

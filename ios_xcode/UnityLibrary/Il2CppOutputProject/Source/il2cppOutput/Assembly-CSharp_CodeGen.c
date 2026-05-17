@@ -73,8 +73,15 @@ extern void CameraPopupManager_StopCameraPreview_mB6A5382FDD2809625D0B29C16C7B2C
 extern void CameraPopupManager__ctor_mFA84B61F971A60493477EF9FB745B557A3CE50D6 (void);
 extern void FlutterBridge_Awake_m575F2DDB75B3556D02AB3A5E262C6417253FDB1C (void);
 extern void FlutterBridge_Start_m705E4F2056AAB22976F88A2E86D56A6610939A2F (void);
+extern void FlutterBridge_SendReadyAfterDelay_m93239103E5C6BD5E3D270599579A971A30442DA3 (void);
 extern void FlutterBridge_LoadScene_mF2E09DAACFF918DA04D0F4523F43FABAC284E478 (void);
 extern void FlutterBridge__ctor_m8C7C130B9FDDA38785839365E9EC76BFDF6CA44B (void);
+extern void U3CSendReadyAfterDelayU3Ed__2__ctor_m1AF8882E60F6FF8AD80F0E39C4B977FB66CA38CD (void);
+extern void U3CSendReadyAfterDelayU3Ed__2_System_IDisposable_Dispose_m85D3C4742EAD195DC829BCC1D41CD54F7A00C4FB (void);
+extern void U3CSendReadyAfterDelayU3Ed__2_MoveNext_m76270E8DECB6957CDF5751BAEFE91F6A22041D4D (void);
+extern void U3CSendReadyAfterDelayU3Ed__2_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m3D38BCB260AE8BF50381862479497F02A69736BB (void);
+extern void U3CSendReadyAfterDelayU3Ed__2_System_Collections_IEnumerator_Reset_m36072919D8D603ECBFBCA697866E82EC64840509 (void);
+extern void U3CSendReadyAfterDelayU3Ed__2_System_Collections_IEnumerator_get_Current_m34B31CDD1D15D38648D8313B94F9914CD2C4EA29 (void);
 extern void Game1Manager_Start_mC8421645E084ACBFFA0D92A9D8C368273DABDE1E (void);
 extern void Game1Manager_Update_m862E3DAA95217F426CB7AAD3E735D834F0E05E2C (void);
 extern void Game1Manager_TrySelectObject_mBFA0DA3ECFE5A7B619FC7EF20E2C91B1A8D69000 (void);
@@ -182,7 +189,7 @@ extern void MessageHandlerDelegate__ctor_m287CBD25D77011FC5A52D1090F6CC31353AB63
 extern void MessageHandlerDelegate_Invoke_mD1EC9E1841D5014C40A26D4C4BA076482FFC8A4B (void);
 extern void MessageHandlerDelegate_BeginInvoke_m0CC5C5B29E11DD03F1726B49E4B1E516479AC58D (void);
 extern void MessageHandlerDelegate_EndInvoke_mAD2746E001DB9A3D18A1D806610542321FE0CF16 (void);
-static Il2CppMethodPointer s_methodPointers[183] = 
+static Il2CppMethodPointer s_methodPointers[190] = 
 {
 	NULL,
 	NULL,
@@ -253,8 +260,15 @@ static Il2CppMethodPointer s_methodPointers[183] =
 	CameraPopupManager__ctor_mFA84B61F971A60493477EF9FB745B557A3CE50D6,
 	FlutterBridge_Awake_m575F2DDB75B3556D02AB3A5E262C6417253FDB1C,
 	FlutterBridge_Start_m705E4F2056AAB22976F88A2E86D56A6610939A2F,
+	FlutterBridge_SendReadyAfterDelay_m93239103E5C6BD5E3D270599579A971A30442DA3,
 	FlutterBridge_LoadScene_mF2E09DAACFF918DA04D0F4523F43FABAC284E478,
 	FlutterBridge__ctor_m8C7C130B9FDDA38785839365E9EC76BFDF6CA44B,
+	U3CSendReadyAfterDelayU3Ed__2__ctor_m1AF8882E60F6FF8AD80F0E39C4B977FB66CA38CD,
+	U3CSendReadyAfterDelayU3Ed__2_System_IDisposable_Dispose_m85D3C4742EAD195DC829BCC1D41CD54F7A00C4FB,
+	U3CSendReadyAfterDelayU3Ed__2_MoveNext_m76270E8DECB6957CDF5751BAEFE91F6A22041D4D,
+	U3CSendReadyAfterDelayU3Ed__2_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m3D38BCB260AE8BF50381862479497F02A69736BB,
+	U3CSendReadyAfterDelayU3Ed__2_System_Collections_IEnumerator_Reset_m36072919D8D603ECBFBCA697866E82EC64840509,
+	U3CSendReadyAfterDelayU3Ed__2_System_Collections_IEnumerator_get_Current_m34B31CDD1D15D38648D8313B94F9914CD2C4EA29,
 	Game1Manager_Start_mC8421645E084ACBFFA0D92A9D8C368273DABDE1E,
 	Game1Manager_Update_m862E3DAA95217F426CB7AAD3E735D834F0E05E2C,
 	Game1Manager_TrySelectObject_mBFA0DA3ECFE5A7B619FC7EF20E2C91B1A8D69000,
@@ -368,7 +382,7 @@ static Il2CppMethodPointer s_methodPointers[183] =
 	MessageHandlerDelegate_BeginInvoke_m0CC5C5B29E11DD03F1726B49E4B1E516479AC58D,
 	MessageHandlerDelegate_EndInvoke_mAD2746E001DB9A3D18A1D806610542321FE0CF16,
 };
-static const int32_t s_InvokerIndices[183] = 
+static const int32_t s_InvokerIndices[190] = 
 {
 	0,
 	0,
@@ -439,8 +453,15 @@ static const int32_t s_InvokerIndices[183] =
 	8002,
 	8002,
 	8002,
+	7869,
 	6321,
 	8002,
+	6277,
+	8002,
+	7742,
+	7869,
+	8002,
+	7869,
 	8002,
 	8002,
 	6429,
@@ -557,8 +578,8 @@ static const int32_t s_InvokerIndices[183] =
 static const Il2CppTokenRangePair s_rgctxIndices[3] = 
 {
 	{ 0x02000002, { 0, 29 } },
-	{ 0x02000021, { 29, 11 } },
-	{ 0x0600009D, { 40, 2 } },
+	{ 0x02000022, { 29, 11 } },
+	{ 0x060000A4, { 40, 2 } },
 };
 extern const uint32_t g_rgctx_U3CU3Ef__AnonymousType0_4_t93FD0713D40011506D6B5581D9D5064D1A1A31B8;
 extern const uint32_t g_rgctx_U3CidU3Ej__TPar_tB4283D6614B0A1B9713411CF590AE6445EC76C76;
@@ -651,7 +672,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule;
 const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule = 
 {
 	"Assembly-CSharp.dll",
-	183,
+	190,
 	s_methodPointers,
 	0,
 	NULL,

@@ -344,7 +344,9 @@ IL2CPP_EXTERN_C String_t* _stringLiteral2BE6AC79DE0EEAFB9D1A7BF00A1FE8E4E1364B3C
 IL2CPP_EXTERN_C String_t* _stringLiteral3C196FCA43E1981D9C4487E25377EA5C787C11C6;
 IL2CPP_EXTERN_C String_t* _stringLiteral4527797EB6031E27667614D3AC77B371F92AD425;
 IL2CPP_EXTERN_C String_t* _stringLiteral4ADEA056DBCD39943B3EB4FE59994611905676BA;
+IL2CPP_EXTERN_C String_t* _stringLiteral4BBEA113AA3F9DC46D32AE6CAA02663E618D8084;
 IL2CPP_EXTERN_C String_t* _stringLiteral4C449EFD64CFEBF14034E0EACB7EE3A50803F8E8;
+IL2CPP_EXTERN_C String_t* _stringLiteral4E2E02F14F938E391373778F329F484B98661895;
 IL2CPP_EXTERN_C String_t* _stringLiteral4F82E745C837A3C8EA2F8AF4F2FFC22F09DCD573;
 IL2CPP_EXTERN_C String_t* _stringLiteral5F402EBAE3A055C0B2DE54701619B5C16A8EAB27;
 IL2CPP_EXTERN_C String_t* _stringLiteral60D5801B3DE1545126B373152DA0C17EB568D85F;
@@ -370,6 +372,7 @@ IL2CPP_EXTERN_C String_t* _stringLiteralCE18B047107AA23D1AA9B2ED32D316148E02655F
 IL2CPP_EXTERN_C String_t* _stringLiteralD1E27657411488F15531C7437D80B6AE28324780;
 IL2CPP_EXTERN_C String_t* _stringLiteralD4FBFC6CE17A48708BECD62C99613FC58312ECF0;
 IL2CPP_EXTERN_C String_t* _stringLiteralDA39A3EE5E6B4B0D3255BFEF95601890AFD80709;
+IL2CPP_EXTERN_C String_t* _stringLiteralE547230F866AFE5E489D0447610C04153FFF89F4;
 IL2CPP_EXTERN_C String_t* _stringLiteralEA64C610DFA863C445196F98AE1C59C7E6F1B8EC;
 IL2CPP_EXTERN_C String_t* _stringLiteralF955048DD3E613C5E48781216F97DBF28E994F4B;
 IL2CPP_EXTERN_C String_t* _stringLiteralFDD9193E6B91A4129075977E0B8817B1FEA9A82F;
@@ -9180,7 +9183,24 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FlutterBridge_Awake_m575F2DDB75B3556D02A
 }
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FlutterBridge_Start_m705E4F2056AAB22976F88A2E86D56A6610939A2F (FlutterBridge_tE910887C9AADDD4E4BFE07E84864B4E8085B480D* __this, const RuntimeMethod* method) 
 {
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
 	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SingletonMonoBehaviour_1_get_Instance_mA19DFD2BB18F1E20748ABE046DCC88A3BBD81D4E_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SingletonMonoBehaviour_1_tBFAF7683DA4F979C6C7C7C3DFE18973BAB4231CF_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral4BBEA113AA3F9DC46D32AE6CAA02663E618D8084);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral4E2E02F14F938E391373778F329F484B98661895);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral4E2E02F14F938E391373778F329F484B98661895, NULL);
+		il2cpp_codegen_runtime_class_init_inline(SingletonMonoBehaviour_1_tBFAF7683DA4F979C6C7C7C3DFE18973BAB4231CF_il2cpp_TypeInfo_var);
+		UnityMessageManager_t3FB57FDD86818C144C13B2F1CB459C4566BE2E56* L_0;
+		L_0 = SingletonMonoBehaviour_1_get_Instance_mA19DFD2BB18F1E20748ABE046DCC88A3BBD81D4E(SingletonMonoBehaviour_1_get_Instance_mA19DFD2BB18F1E20748ABE046DCC88A3BBD81D4E_RuntimeMethod_var);
+		NullCheck(L_0);
+		UnityMessageManager_SendMessageToFlutter_m01236AF27F51C863E80F5220F02BA45E9ED4BAB9(L_0, _stringLiteral4BBEA113AA3F9DC46D32AE6CAA02663E618D8084, NULL);
 		return;
 	}
 }
@@ -9189,26 +9209,33 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FlutterBridge_LoadScene_mF2E09DAACFF918D
 	static bool s_Il2CppMethodInitialized;
 	if (!s_Il2CppMethodInitialized)
 	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SceneManager_tA0EF56A88ACA4A15731AF7FDC10A869FA4C698FA_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralE547230F866AFE5E489D0447610C04153FFF89F4);
 		s_Il2CppMethodInitialized = true;
 	}
 	int32_t V_0 = 0;
 	{
 		String_t* L_0 = ___0_sceneIndexStr;
-		bool L_1;
-		L_1 = Int32_TryParse_mC928DE2FEC1C35ED5298BDDCA9868076E94B8A21(L_0, (&V_0), NULL);
-		if (!L_1)
+		String_t* L_1;
+		L_1 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(_stringLiteralE547230F866AFE5E489D0447610C04153FFF89F4, L_0, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_1, NULL);
+		String_t* L_2 = ___0_sceneIndexStr;
+		bool L_3;
+		L_3 = Int32_TryParse_mC928DE2FEC1C35ED5298BDDCA9868076E94B8A21(L_2, (&V_0), NULL);
+		if (!L_3)
 		{
-			goto IL_0010;
+			goto IL_0020;
 		}
 	}
 	{
-		int32_t L_2 = V_0;
+		int32_t L_4 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(SceneManager_tA0EF56A88ACA4A15731AF7FDC10A869FA4C698FA_il2cpp_TypeInfo_var);
-		SceneManager_LoadScene_m0957E62F2A0A0243C79394E5B74E8EFA86BE5ED1(L_2, NULL);
+		SceneManager_LoadScene_m0957E62F2A0A0243C79394E5B74E8EFA86BE5ED1(L_4, NULL);
 	}
 
-IL_0010:
+IL_0020:
 	{
 		return;
 	}

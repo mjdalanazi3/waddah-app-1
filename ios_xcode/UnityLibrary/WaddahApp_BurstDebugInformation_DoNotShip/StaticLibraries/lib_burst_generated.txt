@@ -1,0 +1,20 @@
+Library: /Users/jumana/waddah-app-1/unity/WaddahApp/Temp/BurstOutput/StaticLibraries/lib_burst_generated
+--platform=iOS
+--minimum-os-version=15.0
+--backend=burst-llvm-19
+--target=ARMV8A_AARCH64
+--global-safety-checks-setting=Off
+--meta-data-generation=False
+--dump=Function
+--float-precision=Standard
+--target-framework=NetFramework
+--generate-link-xml=Temp/burst.link.xml
+--temp-folder=/Users/jumana/waddah-app-1/unity/WaddahApp/Temp/Burst
+--generate-static-linkage-methods
+--force-disable-frame-info-registration
+--key-folder=/Applications/Unity/Hub/Editor/2022.3.62f3/PlaybackEngines/iOSSupport
+--decode-folder=/Users/jumana/waddah-app-1/unity/WaddahApp/Library/Burst
+--output=/Users/jumana/waddah-app-1/unity/WaddahApp/Temp/BurstOutput/StaticLibraries/lib_burst_generated
+--pdb-search-paths=Temp/ManagedSymbols/
+
+

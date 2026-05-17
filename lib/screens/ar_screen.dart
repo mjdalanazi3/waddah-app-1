@@ -28,7 +28,6 @@ class ARScreen extends StatefulWidget {
 class _ARScreenState extends State<ARScreen> {
   UnityWidgetController? _unityWidgetController;
   bool _showUnity = false;
-  bool _unityReady = false;
   bool _audioEnabled = false;
   bool _isSpeaking = false;
   late FlutterTts _flutterTts;
@@ -78,49 +77,62 @@ class _ARScreenState extends State<ARScreen> {
 
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.status;
+    debugPrint('=== CAMERA STATUS: $status ===');
     if (status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '✅ تم السماح بالوصول للكاميرا',
-            style: GoogleFonts.cairo(),
-            textAlign: TextAlign.right,
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ تم السماح بالوصول للكاميرا',
+                style: GoogleFonts.cairo(), textAlign: TextAlign.right),
+            backgroundColor: primaryGreen,
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: primaryGreen,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
     } else {
       _showCameraPermissionDialog();
     }
   }
 
   Future<void> _handleStartGame() async {
-    setState(() => _showUnity = true);
-  }
-
-  void _onUnityCreated(UnityWidgetController controller) {
-    _unityWidgetController = controller;
-    debugPrint('=== LOADING SCENE: ${widget.gameScene} ===');
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        controller.postMessage(
-          'FlutterBridge',
-          'LoadScene',
-          widget.gameScene.toString(),
-        );
+    final status = await Permission.camera.status;
+    debugPrint('=== START GAME - CAMERA STATUS: $status ===');
+    if (status.isGranted) {
+      setState(() => _showUnity = true);
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    } else {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        setState(() => _showUnity = true);
+      } else if (result.isPermanentlyDenied) {
+        openAppSettings();
+      } else {
+        _showCameraPermissionDialog();
       }
-    });
-  }
-
-  // ✅ Called when Unity sends any message to Flutter
-  void _onUnityMessage(message) {
-    debugPrint('=== Unity message received: $message ===');
-    if (message.toString() == 'gameComplete') {
-      debugPrint('=== Game complete received! Ending game... ===');
-      _endGame();
     }
   }
+
+void _onUnityCreated(UnityWidgetController controller) {
+  _unityWidgetController = controller;
+  debugPrint('=== UNITY WIDGET CREATED ===');
+}
+
+void _onUnityMessage(message) {
+  debugPrint('=== Unity message: $message ===');
+  if (message.toString() == 'UnityReady') { 
+    debugPrint('=== Unity ready - loading scene: ${widget.gameScene} ===');
+    _unityWidgetController?.postMessage(
+      'FlutterBridge',
+      'LoadScene',
+      widget.gameScene.toString(),
+    );
+  } else if (message.toString() == 'gameComplete') {
+    _endGame();
+  }
+}
 
   void _showCameraPermissionDialog() {
     showDialog(
@@ -139,33 +151,26 @@ class _ARScreenState extends State<ARScreen> {
                   width: 80,
                   height: 80,
                   decoration: const BoxDecoration(
-                    color: primaryPurple,
-                    shape: BoxShape.circle,
-                  ),
+                      color: primaryPurple, shape: BoxShape.circle),
                   child: const Icon(Icons.camera_alt_rounded,
                       color: Colors.white, size: 36),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'السماح بالوصول للكاميرا',
-                  style: GoogleFonts.cairo(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A1A),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                Text('السماح بالوصول للكاميرا',
+                    style: GoogleFonts.cairo(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1A1A1A)),
+                    textAlign: TextAlign.center),
                 const SizedBox(height: 10),
                 Text(
-                  'تحتاج تجربة الواقع المعزز إلى استخدام الكاميرا، هل تسمح بذلك؟',
-                  style: GoogleFonts.cairo(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF666666),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                    'تحتاج تجربة الواقع المعزز إلى استخدام الكاميرا، هل تسمح بذلك؟',
+                    style: GoogleFonts.cairo(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF666666),
+                        height: 1.6),
+                    textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -205,10 +210,9 @@ class _ARScreenState extends State<ARScreen> {
                         ),
                         child: Text('لا',
                             style: GoogleFonts.cairo(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF666666),
-                            )),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF666666))),
                       ),
                     ),
                   ],
@@ -262,18 +266,16 @@ class _ARScreenState extends State<ARScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Show Unity fullscreen when game starts
     if (_showUnity) {
       return Scaffold(
         body: Stack(
           children: [
             UnityWidget(
               onUnityCreated: _onUnityCreated,
-              onUnityMessage: _onUnityMessage, // ✅ listen for gameComplete
+              onUnityMessage: _onUnityMessage,
               useAndroidViewSurface: false,
               fullscreen: false,
             ),
-            // End game button overlay
             Positioned(
               bottom: 40,
               left: 0,
@@ -290,22 +292,18 @@ class _ARScreenState extends State<ARScreen> {
                         horizontal: 32, vertical: 14),
                     elevation: 0,
                   ),
-                  child: Text(
-                    'إنهاء اللعبة',
-                    style: GoogleFonts.cairo(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text('إنهاء اللعبة',
+                      style: GoogleFonts.cairo(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
-            // Back button
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               right: 16,
               child: GestureDetector(
                 onTap: () => setState(() {
                   _showUnity = false;
-                  _unityReady = false;
                 }),
                 child: Container(
                   width: 48,
@@ -315,9 +313,7 @@ class _ARScreenState extends State<ARScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                      ),
+                          color: Colors.black.withOpacity(0.1), blurRadius: 8)
                     ],
                   ),
                   child: const Icon(Icons.arrow_forward_ios_rounded,
@@ -330,7 +326,6 @@ class _ARScreenState extends State<ARScreen> {
       );
     }
 
-    // Normal AR screen UI
     return Scaffold(
       body: Stack(
         children: [
@@ -353,26 +348,21 @@ class _ARScreenState extends State<ARScreen> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                  padding:
+                      const EdgeInsets.only(left: 16, right: 16, top: 8),
                   child: Center(
-                    child: Image.asset(
-                      'assets/UI/RoundLogo.png',
-                      height: 90,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.train,
-                              size: 60, color: primaryPurple),
-                    ),
+                    child: Image.asset('assets/UI/RoundLogo.png',
+                        height: 90,
+                        errorBuilder: (c, e, s) => const Icon(Icons.train,
+                            size: 60, color: primaryPurple)),
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  'ألعاب الواقع المعزز',
-                  style: GoogleFonts.cairo(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: primaryPurple,
-                  ),
-                ),
+                Text('ألعاب الواقع المعزز',
+                    style: GoogleFonts.cairo(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: primaryPurple)),
                 const SizedBox(height: 12),
                 Expanded(
                   child: Container(
@@ -383,10 +373,9 @@ class _ARScreenState extends State<ARScreen> {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4))
                       ],
                     ),
                     child: Directionality(
@@ -402,73 +391,60 @@ class _ARScreenState extends State<ARScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 7),
                                 decoration: BoxDecoration(
-                                  color: lightPurple,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                                    color: lightPurple,
+                                    borderRadius: BorderRadius.circular(20)),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('🚇',
-                                        style: TextStyle(fontSize: 16)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      widget.moduleTitle,
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: primaryPurple,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text('🚇',
+                                          style: TextStyle(fontSize: 16)),
+                                      const SizedBox(width: 8),
+                                      Text(widget.moduleTitle,
+                                          style: GoogleFonts.cairo(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryPurple)),
+                                    ]),
                               ),
                             ),
                             const SizedBox(height: 14),
-                            Text(
-                              widget.taskTitle,
-                              style: GoogleFonts.cairo(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A1A),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+                            Text(widget.taskTitle,
+                                style: GoogleFonts.cairo(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1A1A1A)),
+                                textAlign: TextAlign.center),
                             const SizedBox(height: 20),
-                            // Camera preview placeholder
                             GestureDetector(
-                              onTap: _showCameraPermissionDialog,
+                              onTap: _requestCameraPermission,
                               child: Container(
                                 height: 180,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: const Color(0xFFBDBDBD),
-                                ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color(0xFFBDBDBD)),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.15),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.black
+                                                    .withOpacity(0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(20))),
+                                        Container(
+                                          width: 72,
+                                          height: 72,
+                                          decoration: const BoxDecoration(
+                                              color: primaryPurple,
+                                              shape: BoxShape.circle),
+                                          child: const Icon(
+                                              Icons.camera_alt_rounded,
+                                              color: Colors.white,
+                                              size: 36),
                                         ),
-                                      ),
-                                      Container(
-                                        width: 72,
-                                        height: 72,
-                                        decoration: const BoxDecoration(
-                                          color: primaryPurple,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                            Icons.camera_alt_rounded,
-                                            color: Colors.white,
-                                            size: 36),
-                                      ),
-                                    ],
-                                  ),
+                                      ]),
                                 ),
                               ),
                             ),
@@ -476,40 +452,33 @@ class _ARScreenState extends State<ARScreen> {
                             Container(
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
-                                color: lightPurple,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                    color: primaryPurple.withOpacity(0.2)),
-                              ),
+                                  color: lightPurple,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                      color:
+                                          primaryPurple.withOpacity(0.2))),
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    children: [
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Row(children: [
                                       const Icon(Icons.info_outline_rounded,
                                           color: primaryPurple, size: 22),
                                       const SizedBox(width: 8),
                                       Text('التعليمات',
                                           style: GoogleFonts.cairo(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: primaryPurple,
-                                          )),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    widget.instructions,
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 15,
-                                      color: const Color(0xFF333333),
-                                      height: 1.8,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ],
-                              ),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryPurple)),
+                                    ]),
+                                    const SizedBox(height: 10),
+                                    Text(widget.instructions,
+                                        style: GoogleFonts.cairo(
+                                            fontSize: 15,
+                                            color: const Color(0xFF333333),
+                                            height: 1.8),
+                                        textAlign: TextAlign.right),
+                                  ]),
                             ),
                             const SizedBox(height: 16),
                             GestureDetector(
@@ -523,48 +492,43 @@ class _ARScreenState extends State<ARScreen> {
                                       : const Color(0xFFF5F5F5),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: _audioEnabled
-                                        ? primaryGreen
-                                        : const Color(0xFFDDDDDD),
-                                    width: 1.5,
-                                  ),
+                                      color: _audioEnabled
+                                          ? primaryGreen
+                                          : const Color(0xFFDDDDDD),
+                                      width: 1.5),
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Icon(
-                                      _isSpeaking
-                                          ? Icons.stop_circle_rounded
-                                          : Icons.play_circle_rounded,
-                                      color: _audioEnabled
-                                          ? primaryGreen
-                                          : const Color(0xFFAAAAAA),
-                                      size: 28,
-                                    ),
-                                    Text(
-                                      _isSpeaking
-                                          ? 'جاري قراءة التعليمات...'
-                                          : _audioEnabled
-                                              ? 'اضغط لإيقاف السرد'
-                                              : 'اضغط لسماع التعليمات',
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        _isSpeaking
+                                            ? Icons.stop_circle_rounded
+                                            : Icons.play_circle_rounded,
                                         color: _audioEnabled
                                             ? primaryGreen
-                                            : const Color(0xFF888888),
-                                      ),
-                                    ),
+                                            : const Color(0xFFAAAAAA),
+                                        size: 28),
+                                    Text(
+                                        _isSpeaking
+                                            ? 'جاري قراءة التعليمات...'
+                                            : _audioEnabled
+                                                ? 'اضغط لإيقاف السرد'
+                                                : 'اضغط لسماع التعليمات',
+                                        style: GoogleFonts.cairo(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: _audioEnabled
+                                                ? primaryGreen
+                                                : const Color(0xFF888888))),
                                     Icon(
-                                      _isSpeaking
-                                          ? Icons.volume_up_rounded
-                                          : Icons.volume_off_rounded,
-                                      color: _audioEnabled
-                                          ? primaryGreen
-                                          : const Color(0xFFAAAAAA),
-                                      size: 24,
-                                    ),
+                                        _isSpeaking
+                                            ? Icons.volume_up_rounded
+                                            : Icons.volume_off_rounded,
+                                        color: _audioEnabled
+                                            ? primaryGreen
+                                            : const Color(0xFFAAAAAA),
+                                        size: 24),
                                   ],
                                 ),
                               ),
@@ -584,18 +548,17 @@ class _ARScreenState extends State<ARScreen> {
                                   elevation: 0,
                                 ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.play_arrow_rounded,
-                                        size: 28),
-                                    const SizedBox(width: 8),
-                                    Text('ابدأ اللعبة',
-                                        style: GoogleFonts.cairo(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                  ],
-                                ),
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.play_arrow_rounded,
+                                          size: 28),
+                                      const SizedBox(width: 8),
+                                      Text('ابدأ اللعبة',
+                                          style: GoogleFonts.cairo(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold)),
+                                    ]),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -613,10 +576,9 @@ class _ARScreenState extends State<ARScreen> {
                                 ),
                                 child: Text('إنهاء اللعبة',
                                     style: GoogleFonts.cairo(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: primaryGreen,
-                                    )),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: primaryGreen)),
                               ),
                             ),
                           ],
@@ -641,9 +603,7 @@ class _ARScreenState extends State<ARScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                    ),
+                        color: Colors.black.withOpacity(0.1), blurRadius: 8)
                   ],
                 ),
                 child: const Icon(Icons.arrow_forward_ios_rounded,

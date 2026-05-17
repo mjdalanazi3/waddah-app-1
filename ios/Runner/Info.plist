@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access for AR games</string>
 	<key>CFBundleDisplayName</key>
 	<string>Waddah App</string>
 	<key>CFBundleExecutable</key>

@@ -49,11 +49,11 @@ class _NodeProgressScreenState extends State<NodeProgressScreen> {
 int _gameSceneFromTitle(String title) {
   switch (title) {
     case 'آداب المترو':
-      return 0;  // Game0 
+      return 0;
     case 'كيف أتنقل':
-      return 1;  // Game1
+      return 0;  
     case 'ماذا أفعل عند الضياع':
-      return 2;  // Game2
+      return 1;  
     default:
       return 0;
   }
